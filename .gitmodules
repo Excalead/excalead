@@ -1,0 +1,3 @@
+[submodule "third-parties/anchor"]
+	path = third-parties/anchor
+	url = https://github.com/solana-foundation/anchor.git
