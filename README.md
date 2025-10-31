@@ -1,2 +1,2 @@
 # Excalead
-> Smart contracts audit with AI for Solana
+> Smart contracts audit with AI + Formal Verification for Solana
