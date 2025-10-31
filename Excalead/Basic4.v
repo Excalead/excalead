@@ -1,23 +1,4 @@
-Require Import Coq.ZArith.ZArith.
-
-From Excalead Require Import RecordUpdate.
-
-Global Open Scope Z_scope.
-
-Parameter Pubkey : Set.
-
-Definition u8 : Set := Z.
-Definition u16 : Set := Z.
-Definition u32 : Set := Z.
-Definition u64 : Set := Z.
-Definition u128 : Set := Z.
-Definition usize : Set := Z.
-Definition i8 : Set := Z.
-Definition i16 : Set := Z.
-Definition i32 : Set := Z.
-Definition i64 : Set := Z.
-Definition i128 : Set := Z.
-Definition isize : Set := Z.
+Require Import Excalead.Excalead.
 
 (** Error codes *)
 Module ErrorCode.
@@ -45,18 +26,12 @@ Module Account.
 End Account.
 
 Module Signer.
-  Parameter t : Set.
-
-  Parameter key : forall (self : t), Pubkey.
+  Parameter key : forall (self : Signer.t), Pubkey.
 End Signer.
 
 Module Program.
   Parameter t : Set -> Set.
 End Program.
-
-Module System.
-  Parameter t : Set.
-End System.
 
 Module Initialize.
   Record t : Set := {
@@ -114,45 +89,3 @@ Module program.
 
     Result.Ok ctx.(Context.accounts).
 End program.
-
-  (** Contexts *)
-  Record InitializeCtx := mkInitializeCtx {
-    counter : Counter;
-    authority : bytes32;
-    system_program : unit
-  }.
-
-  Record IncrementCtx := mkIncrementCtx {
-    counter : Counter;
-    authority : bytes32
-  }.
-
-  (** Result type *)
-  Inductive Result (A : Type) :=
-  | Ok : A -> Result A
-  | Err : ErrorCode -> Result A.
-
-  Arguments Ok {A} _.
-  Arguments Err {A} _.
-
-  (** Helper for key equality *)
-  Definition require_keys_eq (k1 k2 : bytes32) : Result unit :=
-    if k1 =? k2 then Ok tt else Err Unauthorized.
-
-  (** initialize instruction *)
-  Definition initialize (ctx : InitializeCtx) : Result Counter :=
-    let bump := ctx.(counter).(bump) in
-    let counter' := mkCounter ctx.(authority) 0 bump in
-    Ok counter'.
-
-  (** increment instruction *)
-  Definition increment (ctx : IncrementCtx) : Result Counter :=
-    match require_keys_eq ctx.(authority) ctx.(counter).(authority) with
-    | Err e => Err e
-    | Ok _ =>
-      let c := ctx.(counter) in
-      let c' := mkCounter c.(authority) (c.(count) + 1) c.(bump) in
-      Ok c'
-    end.
-
-End Basic4.
