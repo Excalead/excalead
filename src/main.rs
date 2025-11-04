@@ -23,53 +23,31 @@ fn main() -> anyhow::Result<()> {
     let idl_content = fs::read(&args.idl_path)?;
     let idl = convert_idl(&idl_content)?;
 
-    // Generate Coq code
-    let coq_code = generate_coq(&idl);
+    // Generate Rocq code
+    let rocq_code = generate_rocq(&idl);
 
     // Output the result
     if let Some(output_path) = &args.output {
-        fs::write(output_path, coq_code)?;
+        fs::write(output_path, rocq_code)?;
     } else {
-        print!("{}", coq_code);
+        print!("{}", rocq_code);
     }
 
     Ok(())
 }
 
-fn generate_coq(idl: &Idl) -> String {
+fn generate_rocq(idl: &Idl) -> String {
     let mut output = String::new();
 
     // Header
-    output.push_str("Require Import Coq.ZArith.ZArith.\n\n");
-    output.push_str("From Excalead Require Import RecordUpdate.\n\n");
-    output.push_str("Global Open Scope Z_scope.\n\n");
-
-    // Basic type definitions
-    output.push_str("Parameter Pubkey : Set.\n\n");
-    output.push_str("Definition u8 : Set := Z.\n");
-    output.push_str("Definition u16 : Set := Z.\n");
-    output.push_str("Definition u32 : Set := Z.\n");
-    output.push_str("Definition u64 : Set := Z.\n");
-    output.push_str("Definition u128 : Set := Z.\n");
-    output.push_str("Definition usize : Set := Z.\n");
-    output.push_str("Definition i8 : Set := Z.\n");
-    output.push_str("Definition i16 : Set := Z.\n");
-    output.push_str("Definition i32 : Set := Z.\n");
-    output.push_str("Definition i64 : Set := Z.\n");
-    output.push_str("Definition i128 : Set := Z.\n");
-    output.push_str("Definition isize : Set := Z.\n");
-    output.push_str("Definition bool : Set := bool.\n");
-    output.push_str("Definition f32 : Set := Z. (* TODO: proper float *)\n");
-    output.push_str("Definition f64 : Set := Z. (* TODO: proper float *)\n");
-    output.push_str("Definition bytes : Set := list u8.\n");
-    output.push_str("Definition string : Set := list u8.\n\n");
+    output.push_str("Require Import Excalead.Excalead.\n\n");
 
     // Constants
     if !idl.constants.is_empty() {
         output.push_str("(** Constants *)\n");
         for constant in &idl.constants {
-            let coq_type = idl_type_to_coq(&constant.ty);
-            output.push_str(&format!("Definition {} : {} :=\n", constant.name, coq_type));
+            let rocq_type = idl_type_to_rocq(&constant.ty);
+            output.push_str(&format!("Definition {} : {} :=\n", constant.name, rocq_type));
             output.push_str(&format!("  {}.\n\n", constant.value));
         }
     }
@@ -101,9 +79,9 @@ fn generate_coq(idl: &Idl) -> String {
                         output.push_str(&format!("Module {}.Record t : Set :={{\n", ty_def.name));
                         for (i, field) in fields_list.iter().enumerate() {
                             let comma = if i < fields_list.len() - 1 { ";" } else { "." };
-                            let coq_type = idl_type_to_coq(&field.ty);
+                            let rocq_type = idl_type_to_rocq(&field.ty);
                             output
-                                .push_str(&format!("  {} : {} {}\n", field.name, coq_type, comma));
+                                .push_str(&format!("  {} : {} {}\n", field.name, rocq_type, comma));
                         }
                         output.push_str(&format!("}}\nEnd {}.\n\n", ty_def.name));
                     }
@@ -138,9 +116,9 @@ fn generate_coq(idl: &Idl) -> String {
                     if let Some(IdlDefinedFields::Named(fields_list)) = fields {
                         for (i, field) in fields_list.iter().enumerate() {
                             let comma = if i < fields_list.len() - 1 { ";" } else { "." };
-                            let coq_type = idl_type_to_coq(&field.ty);
+                            let rocq_type = idl_type_to_rocq(&field.ty);
                             output
-                                .push_str(&format!("  {} : {} {}\n", field.name, coq_type, comma));
+                                .push_str(&format!("  {} : {} {}\n", field.name, rocq_type, comma));
                         }
                     }
                 }
@@ -161,7 +139,7 @@ fn generate_coq(idl: &Idl) -> String {
             for account in &instruction.accounts {
                 match account {
                     IdlInstructionAccountItem::Single(acc) => {
-                        let coq_type_str = if acc.writable {
+                        let rocq_type_str = if acc.writable {
                             if acc.signer {
                                 "Signer.t".to_string()
                             } else {
@@ -177,7 +155,7 @@ fn generate_coq(idl: &Idl) -> String {
                         } else {
                             "."
                         };
-                        output.push_str(&format!("  {} : {} {}\n", acc.name, coq_type_str, comma));
+                        output.push_str(&format!("  {} : {} {}\n", acc.name, rocq_type_str, comma));
                         account_idx += 1;
                     }
                     IdlInstructionAccountItem::Composite(_) => {
@@ -227,7 +205,7 @@ fn generate_coq(idl: &Idl) -> String {
     output
 }
 
-fn idl_type_to_coq(ty: &IdlType) -> String {
+fn idl_type_to_rocq(ty: &IdlType) -> String {
     match ty {
         IdlType::Bool => "bool".to_string(),
         IdlType::U8 => "u8".to_string(),
@@ -245,15 +223,15 @@ fn idl_type_to_coq(ty: &IdlType) -> String {
         IdlType::Bytes => "bytes".to_string(),
         IdlType::String => "string".to_string(),
         IdlType::Pubkey => "Pubkey".to_string(),
-        IdlType::Option(inner) => format!("option ({})", idl_type_to_coq(inner)),
-        IdlType::Vec(inner) => format!("list ({})", idl_type_to_coq(inner)),
+        IdlType::Option(inner) => format!("option ({})", idl_type_to_rocq(inner)),
+        IdlType::Vec(inner) => format!("list ({})", idl_type_to_rocq(inner)),
         IdlType::Array(inner, len) => match len {
             IdlArrayLen::Value(n) => {
-                format!("list ({}) (* [{}; {}] *)", idl_type_to_coq(inner), n, n)
+                format!("list ({}) (* [{}; {}] *)", idl_type_to_rocq(inner), n, n)
             }
             IdlArrayLen::Generic(_) => format!(
                 "list ({}) (* TODO: generic length array *)",
-                idl_type_to_coq(inner)
+                idl_type_to_rocq(inner)
             ),
         },
         IdlType::Defined { name, .. } => name.clone(),
