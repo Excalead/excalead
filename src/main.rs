@@ -47,8 +47,8 @@ fn generate_rocq(idl: &Idl) -> String {
         output.push_str("(** Constants *)\n");
         for constant in &idl.constants {
             let rocq_type = idl_type_to_rocq(&constant.ty);
-            output.push_str(&format!("Definition {} : {} :=\n", constant.name, rocq_type));
-            output.push_str(&format!("  {}.\n\n", constant.value));
+            output.push_str(&format!("(* {} *)\n", constant.value));
+            output.push_str(&format!("Parameter {} : {}.\n\n", constant.name, rocq_type));
         }
     }
 
@@ -58,13 +58,11 @@ fn generate_rocq(idl: &Idl) -> String {
         output.push_str("Module ErrorCode.\n");
         output.push_str("  Inductive t : Set :=\n");
         for (i, error) in idl.errors.iter().enumerate() {
-            let comma = if i < idl.errors.len() - 1 { "," } else { "." };
-            let msg = error
-                .msg
-                .as_ref()
-                .map(|m| format!(" (* {})", m))
-                .unwrap_or_default();
-            output.push_str(&format!("  | {}{} : string{}\n", error.name, msg, comma));
+            let dot = if i == idl.errors.len() - 1 { "." } else { "" };
+            if let Some(msg) = &error.msg {
+                        output.push_str(&format!("  (** {} *)\n", msg));
+            }
+            output.push_str(&format!("  | {} : t{}\n", error.name, dot));
         }
         output.push_str("End ErrorCode.\n\n");
     }
@@ -73,26 +71,58 @@ fn generate_rocq(idl: &Idl) -> String {
     if !idl.types.is_empty() {
         output.push_str("(** Custom types *)\n");
         for ty_def in &idl.types {
+            // Split the name at each `::` and make as many sub-modules
+            for module_name in ty_def.name.split("::") {
+                output.push_str(&format!("Module {}.\n", module_name));
+            }
+
             match &ty_def.ty {
                 IdlTypeDefTy::Struct { fields } => {
-                    if let Some(IdlDefinedFields::Named(fields_list)) = fields {
-                        output.push_str(&format!("Module {}.Record t : Set :={{\n", ty_def.name));
-                        for (i, field) in fields_list.iter().enumerate() {
-                            let comma = if i < fields_list.len() - 1 { ";" } else { "." };
-                            let rocq_type = idl_type_to_rocq(&field.ty);
-                            output
-                                .push_str(&format!("  {} : {} {}\n", field.name, rocq_type, comma));
+                    match fields {
+                        Some(IdlDefinedFields::Named(fields_list)) => {
+                            output.push_str("  Record t : Set := {\n");
+                            for field in fields_list.iter() {
+                                let rocq_type = idl_type_to_rocq(&field.ty);
+                                output.push_str(&format!("    {} : {};\n", field.name, rocq_type));
+                            }
+                            output.push_str("  }.\n");
                         }
-                        output.push_str(&format!("}}\nEnd {}.\n\n", ty_def.name));
+                        Some(IdlDefinedFields::Tuple(tys)) => {
+                            output.push_str("  Record t : Set := {\n");
+                            for ty in tys.iter() {
+                                let rocq_type = idl_type_to_rocq(ty);
+                                output.push_str(&format!("    _ : {};\n", rocq_type));
+                            }
+                            output.push_str("  }.\n");
+                        }
+                        None => {
+                            output.push_str("  Record t : Set := {\n");
+                            output.push_str("  }.\n");
+                        }
                     }
                 }
                 IdlTypeDefTy::Enum { variants } => {
-                    output.push_str(&format!("Module {}.Inductive t : Set :=\n", ty_def.name));
+                    output.push_str("  Inductive t : Set :=\n");
                     for (i, variant) in variants.iter().enumerate() {
-                        let comma = if i < variants.len() - 1 { " |" } else { "." };
-                        output.push_str(&format!("{}{}\n", variant.name, comma));
+                        let dot = if i == variants.len() - 1 { "." } else { "" };
+                        output.push_str(&format!("  | {}", variant.name));
+                        match &variant.fields {
+                            Some(IdlDefinedFields::Named(fields_list)) => {
+                                for field in fields_list.iter() {
+                                    let rocq_type = idl_type_to_rocq(&field.ty);
+                                    output.push_str(&format!(" ({} : {})", field.name, rocq_type));
+                                }
+                            }
+                            Some(IdlDefinedFields::Tuple(tys)) => {
+                                for ty in tys.iter() {
+                                    let rocq_type = idl_type_to_rocq(ty);
+                                    output.push_str(&format!(" (_ : {})", rocq_type));
+                                }
+                            }
+                            None => {}
+                        }
+                        output.push_str(&format!("{}\n", dot));
                     }
-                    output.push_str(&format!("End {}.\n\n", ty_def.name));
                 }
                 IdlTypeDefTy::Type { .. } => {
                     output.push_str(&format!(
@@ -102,105 +132,91 @@ fn generate_rocq(idl: &Idl) -> String {
                     output.push_str(&format!("End {}.\n\n", ty_def.name));
                 }
             }
+
+            // Close all opened modules
+            for module_name in ty_def.name.split("::").collect::<Vec<_>>().iter().rev() {
+                output.push_str(&format!("End {}.\n", module_name));
+            }
+            output.push_str("\n");
         }
     }
 
     // Account structures
     if !idl.accounts.is_empty() {
         output.push_str("(** Account structures *)\n");
-        for account in &idl.accounts {
-            output.push_str(&format!("Module {}.Record t : Set :={{\n", account.name));
-            // We'll need to find the type definition for this account
-            if let Some(ty_def) = idl.types.iter().find(|t| t.name == account.name) {
-                if let IdlTypeDefTy::Struct { fields } = &ty_def.ty {
-                    if let Some(IdlDefinedFields::Named(fields_list)) = fields {
-                        for (i, field) in fields_list.iter().enumerate() {
-                            let comma = if i < fields_list.len() - 1 { ";" } else { "." };
-                            let rocq_type = idl_type_to_rocq(&field.ty);
-                            output
-                                .push_str(&format!("  {} : {} {}\n", field.name, rocq_type, comma));
-                        }
-                    }
-                }
-            }
-            output.push_str(&format!("}}\nEnd {}.\n\n", account.name));
+        output.push_str("Module AccountStructure.\n");
+        output.push_str("  Inductive t : Set :=\n");
+        for (i, account) in idl.accounts.iter().enumerate() {
+            let dot = if i == idl.accounts.len() - 1 { "." } else { "" };
+            output.push_str(&format!("  | {} : t{}\n", account.name, dot));
         }
+        output.push_str("End AccountStructure.\n\n");
     }
 
     // Instruction contexts
     if !idl.instructions.is_empty() {
         output.push_str("(** Instruction contexts *)\n");
-        for instruction in &idl.instructions {
-            output.push_str(&format!(
-                "Module {}.Record t : Set :={{\n",
-                instruction.name
-            ));
-            let mut account_idx = 0;
+        output.push_str("Module Instruction.\n");
+        output.push_str("  Inductive t : Set -> Set :=\n");
+        for (i, instruction) in idl.instructions.iter().enumerate() {
+            let dot = if i == idl.instructions.len() - 1 { "." } else { "" };
+            output.push_str(&format!("  | {}\n", instruction.name));
+            output.push_str("    (* Accounts *)\n");
             for account in &instruction.accounts {
                 match account {
-                    IdlInstructionAccountItem::Single(acc) => {
-                        let rocq_type_str = if acc.writable {
-                            if acc.signer {
-                                "Signer.t".to_string()
-                            } else {
-                                format!("Account.t TODO (* {})", acc.name)
+                    IdlInstructionAccountItem::Single(account) => {
+                        output.push_str(&format!("      ({} : Account.t", account.name));
+                        output.push_str("\n       ");
+                        output.push_str(if account.writable { " IsWritable.Yes" } else { " IsWritable.No" });
+                        output.push_str("\n       ");
+                        output.push_str(if account.signer { " IsSigner.Yes" } else { " IsSigner.No" });
+                        output.push_str("\n       ");
+                        output.push_str(if account.optional { " IsOptional.Yes" } else { " IsOptional.No" });
+                        output.push_str("\n       ");
+                        match &account.address {
+                            Some(address) => {
+                                output.push_str(&format!(" (Some {})", address));
                             }
-                        } else if acc.signer {
-                            "Signer.t".to_string()
-                        } else {
-                            format!("Account.t TODO (* {})", acc.name)
-                        };
-                        let comma = if account_idx < instruction.accounts.len() - 1 {
-                            ";"
-                        } else {
-                            "."
-                        };
-                        output.push_str(&format!("  {} : {} {}\n", acc.name, rocq_type_str, comma));
-                        account_idx += 1;
+                            None => {
+                                output.push_str(" None");
+                            }
+                        }
+                        output.push_str("\n       ");
+                        match &account.pda {
+                            Some(_pda) => {
+                                output.push_str(&format!(" (Some tt)"));
+                                output.push_str("\n         (* TODO: pda *)");
+                            }
+                            None => {
+                                output.push_str(" None");
+                            }
+                        }
+                        output.push_str("\n      )\n");
                     }
                     IdlInstructionAccountItem::Composite(_) => {
-                        // Handle composite accounts
-                        output.push_str("  (* TODO: composite accounts *)\n");
+                        output.push_str("      (* TODO: composite accounts *)\n");
                     }
                 }
             }
-            output.push_str(&format!("}}\nEnd {}.\n\n", instruction.name));
+            output.push_str("    (* Arguments *)\n");
+            for arg in &instruction.args {
+                let rocq_type_str = idl_type_to_rocq(&arg.ty);
+                output.push_str(&format!("      ({} : {})\n", arg.name, rocq_type_str));
+            }
+            output.push_str("    (* Return *)\n");
+            match &instruction.returns {
+                Some(ret) => {
+                    let rocq_type_str = idl_type_to_rocq(ret);
+                    output.push_str(&format!("       : t {}", rocq_type_str));
+                }
+                None => {
+                    output.push_str("      : t unit");
+                }
+            }
+            output.push_str(&format!("{}\n", dot));
         }
+        output.push_str("End Instruction.\n\n");
     }
-
-    // Result type
-    output.push_str("Module Result.\n");
-    output.push_str("  Inductive t (A : Set) :=\n");
-    output.push_str("  | Ok : A -> t A\n");
-    output.push_str("  | Err : ErrorCode.t -> t A.\n");
-    output.push_str("  Arguments Ok {A} _.\n");
-    output.push_str("  Arguments Err {A} _.\n");
-    output.push_str("End Result.\n\n");
-
-    // Context module
-    output.push_str("Module Context.\n");
-    output.push_str("  Record t {Accounts Bumps : Set} : Set := {\n");
-    output.push_str("    accounts : Accounts;\n");
-    output.push_str("    bumps : Bumps;\n");
-    output.push_str("  }.\n");
-    output.push_str("  Arguments t : clear implicits.\n");
-    output.push_str("End Context.\n\n");
-
-    // Program stub
-    output.push_str("Module program.\n");
-    output.push_str(&format!(
-        "  (* TODO: Implement instructions for {})\n",
-        idl.metadata.name
-    ));
-    for instruction in &idl.instructions {
-        output.push_str(&format!(
-            "  Definition {} (ctx : Context.t {}.t {}Bumps.t) : Result.t unit :=\n",
-            instruction.name, instruction.name, instruction.name
-        ));
-        output.push_str("    (* TODO *)\n");
-        output.push_str("    Result.Ok tt.\n\n");
-    }
-    output.push_str("End program.\n");
 
     output
 }
@@ -234,7 +250,11 @@ fn idl_type_to_rocq(ty: &IdlType) -> String {
                 idl_type_to_rocq(inner)
             ),
         },
-        IdlType::Defined { name, .. } => name.clone(),
+        IdlType::Defined { name, .. } => {
+            // Replace `::` by `.` in the name
+            let name = name.replace("::", ".");
+            format!("{name}.t")
+        }
         IdlType::Generic(name) => name.clone(),
         // Handle newer types if needed
         IdlType::U256 => "u128 (* TODO: u256 *)".to_string(),

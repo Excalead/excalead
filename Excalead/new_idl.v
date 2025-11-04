@@ -1,233 +1,333 @@
 Require Import Excalead.Excalead.
 
 (** Constants *)
-Definition BYTES_STR : bytes :=
-  [116, 101, 115, 116].
+(* [116, 101, 115, 116] *)
+Parameter BYTES_STR : bytes.
 
-Definition BYTE_STR : u8 :=
-  116.
+(* 116 *)
+Parameter BYTE_STR : u8.
 
-Definition I128 : i128 :=
-  1000000.
+(* 1000000 *)
+Parameter I128 : i128.
 
-Definition U8 : u8 :=
-  6.
+(* 6 *)
+Parameter U8 : u8.
 
 (** Error codes *)
 Module ErrorCode.
   Inductive t : Set :=
-  | SomeError (* Example error.) : string,
-  | OtherError (* Another error.) : string,
-  | ErrorWithoutMsg : string.
+  (** Example error. *)
+  | SomeError : t
+  (** Another error. *)
+  | OtherError : t
+  | ErrorWithoutMsg : t.
 End ErrorCode.
 
 (** Custom types *)
-Module BarStruct.Record t : Set :={
-  some_field : bool ;
-  other_field : u8 .
-}
+Module external.
+Module MyStruct.
+  Record t : Set := {
+    some_field : u8;
+  }.
+End MyStruct.
+End external.
+
+Module idl.
+Module some_other_module.
+Module MyStruct.
+  Record t : Set := {
+    some_u8 : u8;
+  }.
+End MyStruct.
+End some_other_module.
+End idl.
+
+Module BarStruct.
+  Record t : Set := {
+    some_field : bool;
+    other_field : u8;
+  }.
 End BarStruct.
 
-Module FooEnum.Inductive t : Set :=
-Unnamed |
-UnnamedSingle |
-Named |
-Struct |
-OptionStruct |
-VecStruct |
-NoFields.
+Module FooEnum.
+  Inductive t : Set :=
+  | Unnamed (_ : bool) (_ : u8) (_ : BarStruct.t)
+  | UnnamedSingle (_ : BarStruct.t)
+  | Named (bool_field : bool) (u8_field : u8) (nested : BarStruct.t)
+  | Struct (_ : BarStruct.t)
+  | OptionStruct (_ : option (BarStruct.t))
+  | VecStruct (_ : list (BarStruct.t))
+  | NoFields.
 End FooEnum.
 
-Module FooStruct.Record t : Set :={
-  field1 : u8 ;
-  field2 : u16 ;
-  nested : BarStruct ;
-  vec_nested : list (BarStruct) ;
-  option_nested : option (BarStruct) ;
-  enum_field : FooEnum .
-}
+Module FooStruct.
+  Record t : Set := {
+    field1 : u8;
+    field2 : u16;
+    nested : BarStruct.t;
+    vec_nested : list (BarStruct.t);
+    option_nested : option (BarStruct.t);
+    enum_field : FooEnum.t;
+  }.
 End FooStruct.
 
-Module SomeEvent.Record t : Set :={
-  bool_field : bool ;
-  external_my_struct : external::MyStruct ;
-  other_module_my_struct : idl::some_other_module::MyStruct .
-}
+Module SomeEvent.
+  Record t : Set := {
+    bool_field : bool;
+    external_my_struct : external.MyStruct.t;
+    other_module_my_struct : idl.some_other_module.MyStruct.t;
+  }.
 End SomeEvent.
 
-Module SomeRetStruct.Record t : Set :={
-  some_field : u8 .
-}
+Module SomeRetStruct.
+  Record t : Set := {
+    some_field : u8;
+  }.
 End SomeRetStruct.
 
-Module SomeZcAccount.Record t : Set :={
-  field : ZcStruct .
-}
-End SomeZcAccount.
-
-Module State.Record t : Set :={
-  bool_field : bool ;
-  u8_field : u8 ;
-  i8_field : i8 ;
-  u16_field : u16 ;
-  i16_field : i16 ;
-  u32_field : u32 ;
-  i32_field : i32 ;
-  f32_field : f32 ;
-  u64_field : u64 ;
-  i64_field : i64 ;
-  f64_field : f64 ;
-  u128_field : u128 ;
-  i128_field : i128 ;
-  bytes_field : bytes ;
-  string_field : string ;
-  pubkey_field : Pubkey ;
-  vec_field : list (u64) ;
-  vec_struct_field : list (FooStruct) ;
-  option_field : option (bool) ;
-  option_struct_field : option (FooStruct) ;
-  struct_field : FooStruct ;
-  array_field : list (bool) (* [3; 3] *) ;
-  enum_field_1 : FooEnum ;
-  enum_field_2 : FooEnum ;
-  enum_field_3 : FooEnum ;
-  enum_field_4 : FooEnum .
-}
-End State.
-
-Module State2.Record t : Set :={
-  vec_of_option : list (option (u64)) ;
-  box_field : bool .
-}
-End State2.
-
-Module ZcStruct.Record t : Set :={
-  some_field : u16 .
-}
+Module ZcStruct.
+  Record t : Set := {
+    some_field : u16;
+  }.
 End ZcStruct.
 
-Module external::MyStruct.Record t : Set :={
-  some_field : u8 .
-}
-End external::MyStruct.
-
-Module idl::some_other_module::MyStruct.Record t : Set :={
-  some_u8 : u8 .
-}
-End idl::some_other_module::MyStruct.
-
-(** Account structures *)
-Module SomeZcAccount.Record t : Set :={
-  field : ZcStruct .
-}
+Module SomeZcAccount.
+  Record t : Set := {
+    field : ZcStruct.t;
+  }.
 End SomeZcAccount.
 
-Module State.Record t : Set :={
-  bool_field : bool ;
-  u8_field : u8 ;
-  i8_field : i8 ;
-  u16_field : u16 ;
-  i16_field : i16 ;
-  u32_field : u32 ;
-  i32_field : i32 ;
-  f32_field : f32 ;
-  u64_field : u64 ;
-  i64_field : i64 ;
-  f64_field : f64 ;
-  u128_field : u128 ;
-  i128_field : i128 ;
-  bytes_field : bytes ;
-  string_field : string ;
-  pubkey_field : Pubkey ;
-  vec_field : list (u64) ;
-  vec_struct_field : list (FooStruct) ;
-  option_field : option (bool) ;
-  option_struct_field : option (FooStruct) ;
-  struct_field : FooStruct ;
-  array_field : list (bool) (* [3; 3] *) ;
-  enum_field_1 : FooEnum ;
-  enum_field_2 : FooEnum ;
-  enum_field_3 : FooEnum ;
-  enum_field_4 : FooEnum .
-}
+Module State.
+  Record t : Set := {
+    bool_field : bool;
+    u8_field : u8;
+    i8_field : i8;
+    u16_field : u16;
+    i16_field : i16;
+    u32_field : u32;
+    i32_field : i32;
+    f32_field : f32;
+    u64_field : u64;
+    i64_field : i64;
+    f64_field : f64;
+    u128_field : u128;
+    i128_field : i128;
+    bytes_field : bytes;
+    string_field : string;
+    pubkey_field : Pubkey;
+    vec_field : list (u64);
+    vec_struct_field : list (FooStruct.t);
+    option_field : option (bool);
+    option_struct_field : option (FooStruct.t);
+    struct_field : FooStruct.t;
+    array_field : list (bool) (* [3; 3] *);
+    enum_field_1 : FooEnum.t;
+    enum_field_2 : FooEnum.t;
+    enum_field_3 : FooEnum.t;
+    enum_field_4 : FooEnum.t;
+  }.
 End State.
 
-Module State2.Record t : Set :={
-  vec_of_option : list (option (u64)) ;
-  box_field : bool .
-}
+Module State2.
+  Record t : Set := {
+    vec_of_option : list (option (u64));
+    box_field : bool;
+  }.
 End State2.
 
+(** Account structures *)
+Module AccountStructure.
+  Inductive t : Set :=
+  | SomeZcAccount : t
+  | State : t
+  | State2 : t.
+End AccountStructure.
+
 (** Instruction contexts *)
-Module cause_error.Record t : Set :={
-}
-End cause_error.
+Module Instruction.
+  Inductive t : Set -> Set :=
+  | cause_error
+    (* Accounts *)
+    (* Arguments *)
+    (* Return *)
+      : t unit
+  | initialize
+    (* Accounts *)
+      (state : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (* TODO: composite accounts *)
+      (zc_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (token_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (mint_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (token_interface_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (mint_interface_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (payer : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (system_program : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        (Some 11111111111111111111111111111111)
+        None
+      )
+    (* Arguments *)
+    (* Return *)
+      : t unit
+  | initialize_with_values
+    (* Accounts *)
+      (state : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (* TODO: composite accounts *)
+      (zc_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (token_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (mint_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (token_interface_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (mint_interface_account : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        None
+        None
+      )
+      (payer : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (system_program : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        (Some 11111111111111111111111111111111)
+        None
+      )
+    (* Arguments *)
+      (bool_field : bool)
+      (u8_field : u8)
+      (i8_field : i8)
+      (u16_field : u16)
+      (i16_field : i16)
+      (u32_field : u32)
+      (i32_field : i32)
+      (f32_field : f32)
+      (u64_field : u64)
+      (i64_field : i64)
+      (f64_field : f64)
+      (u128_field : u128)
+      (i128_field : i128)
+      (bytes_field : bytes)
+      (string_field : string)
+      (pubkey_field : Pubkey)
+      (vec_field : list (u64))
+      (vec_struct_field : list (FooStruct.t))
+      (option_field : option (bool))
+      (option_struct_field : option (FooStruct.t))
+      (struct_field : FooStruct.t)
+      (array_field : list (bool) (* [3; 3] *))
+      (enum_field_1 : FooEnum.t)
+      (enum_field_2 : FooEnum.t)
+      (enum_field_3 : FooEnum.t)
+      (enum_field_4 : FooEnum.t)
+    (* Return *)
+      : t unit
+  | initialize_with_values2
+    (* Accounts *)
+      (state : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (payer : Account.t
+        IsWritable.Yes
+        IsSigner.Yes
+        IsOptional.No
+        None
+        None
+      )
+      (system_program : Account.t
+        IsWritable.No
+        IsSigner.No
+        IsOptional.No
+        (Some 11111111111111111111111111111111)
+        None
+      )
+    (* Arguments *)
+      (vec_of_option : list (option (u64)))
+      (box_field : bool)
+    (* Return *)
+       : t SomeRetStruct.t.
+End Instruction.
 
-Module initialize.Record t : Set :={
-  state : Signer.t ;
-  (* TODO: composite accounts *)
-  zc_account : Account.t TODO (* zc_account) ;
-  token_account : Account.t TODO (* token_account) ;
-  mint_account : Account.t TODO (* mint_account) ;
-  token_interface_account : Account.t TODO (* token_interface_account) ;
-  mint_interface_account : Account.t TODO (* mint_interface_account) ;
-  payer : Signer.t ;
-  system_program : Account.t TODO (* system_program) ;
-}
-End initialize.
-
-Module initialize_with_values.Record t : Set :={
-  state : Signer.t ;
-  (* TODO: composite accounts *)
-  zc_account : Account.t TODO (* zc_account) ;
-  token_account : Account.t TODO (* token_account) ;
-  mint_account : Account.t TODO (* mint_account) ;
-  token_interface_account : Account.t TODO (* token_interface_account) ;
-  mint_interface_account : Account.t TODO (* mint_interface_account) ;
-  payer : Signer.t ;
-  system_program : Account.t TODO (* system_program) ;
-}
-End initialize_with_values.
-
-Module initialize_with_values2.Record t : Set :={
-  state : Signer.t ;
-  payer : Signer.t ;
-  system_program : Account.t TODO (* system_program) .
-}
-End initialize_with_values2.
-
-Module Result.
-  Inductive t (A : Set) :=
-  | Ok : A -> t A
-  | Err : ErrorCode.t -> t A.
-  Arguments Ok {A} _.
-  Arguments Err {A} _.
-End Result.
-
-Module Context.
-  Record t {Accounts Bumps : Set} : Set := {
-    accounts : Accounts;
-    bumps : Bumps;
-  }.
-  Arguments t : clear implicits.
-End Context.
-
-Module program.
-  (* TODO: Implement instructions for idl)
-  Definition cause_error (ctx : Context.t cause_error.t cause_errorBumps.t) : Result.t unit :=
-    (* TODO *)
-    Result.Ok tt.
-
-  Definition initialize (ctx : Context.t initialize.t initializeBumps.t) : Result.t unit :=
-    (* TODO *)
-    Result.Ok tt.
-
-  Definition initialize_with_values (ctx : Context.t initialize_with_values.t initialize_with_valuesBumps.t) : Result.t unit :=
-    (* TODO *)
-    Result.Ok tt.
-
-  Definition initialize_with_values2 (ctx : Context.t initialize_with_values2.t initialize_with_values2Bumps.t) : Result.t unit :=
-    (* TODO *)
-    Result.Ok tt.
-
-End program.
