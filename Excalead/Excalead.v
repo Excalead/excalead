@@ -37,6 +37,26 @@ Definition i32 : Set := Z.
 Definition i64 : Set := Z.
 Definition i128 : Set := Z.
 Definition isize : Set := Z.
+Parameter f32 : Set.
+Parameter f64 : Set.
+
+Parameter bytes : Set.
+
+Module IsWritable.
+  Inductive t : Set := Yes | No.
+End IsWritable.
+
+Module IsSigner.
+  Inductive t : Set := Yes | No.
+End IsSigner.
+
+Module IsOptional.
+  Inductive t : Set := Yes | No.
+End IsOptional.
+
+Module Account.
+  Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
+End Account.
 
 Module Signer.
   Parameter t : Set.
