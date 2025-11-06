@@ -9,7 +9,7 @@ path = "main.rs"
 
 [dependencies]
 # anchor-lang-idl = { path = "../third-parties/anchor/idl", features = ["convert"] }
-anchor-lang-idl = { version = "0.1.2", features = ["convert"] }
+anchor-lang-idl = { version = "0.1.0", features = ["convert"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
