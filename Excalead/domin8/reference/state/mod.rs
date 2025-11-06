@@ -1,5 +1,8 @@
-pub mod domin8_config;
-pub mod domin8_game;
+// State module - contains all account definitions
+pub mod game_config;
+pub mod game_round;
+pub mod player_entry;
 
-pub use domin8_config::*;
-pub use domin8_game::*;
+pub use game_config::*;
+pub use game_round::*;
+pub use player_entry::*;
