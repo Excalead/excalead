@@ -1,6 +1,6 @@
 Require Import Excalead.Excalead.
 
-From Exalead.example.model Require Import state.mod errors.
+From Excalead.domin8.model Require Import state.mod errors constants.
 
 (*
 #[derive(Accounts)]
@@ -38,17 +38,17 @@ End DepositBet.
 Definition deposit_bet
     (ctx : Context.t DepositBet.t)
     (amount: u64) :
-    Resylt.t unit :=
+    Result.t unit :=
   let game_round := ctx.(Context.accounts).(DepositBet.game_round) in
-  let player := Signer.key ctx.(Context.accounts).(DepositBet.player) in
+  let player_key := Signer.key ctx.(Context.accounts).(DepositBet.player) in
   let? clock := Clock.get in
 
   require!
-    game_round.(GameRound.can_accept_players) () with
+    GameRound.can_accept_players game_round with
     "Invalid game status" in
 
   require!
-    amound >=? MIN_BET_LAMPORTS with
+    amount >=? MIN_BET_LAMPORTS with
     "Bet too small" in
 
   require!
@@ -78,9 +78,9 @@ Definition deposit_bet
     } else {
         // Add to existing pot
         game_round.initial_pot = game_round.initial_pot.saturating_add(amount);
-    }
-    
-    // Find existing player or add new one
+     } *)
+
+    (* // Find existing player or add new one
     if let Some(existing_player) = game_round.find_player_mut(&player_key) {
         // Player already exists - add to their bet
         existing_player.total_bet = existing_player.total_bet.saturating_add(amount);
@@ -100,8 +100,28 @@ Definition deposit_bet
         msg!("New player joined: {}, bet: {}, total players: {}", 
              player_key, amount, game_round.players.len());
     }
-    
-    msg!("Total pot: {} lamports", game_round.initial_pot);
+    *)
+    let game_round :=
+      match GameRound.find_player_mut game_round player_key with
+      | Some handle =>
+        handle (fun existing_player => {|
+            PlayerEntry.wallet := existing_player.(PlayerEntry.wallet);
+            PlayerEntry.total_bet :=
+              existing_player.(PlayerEntry.total_bet) + amount;
+            PlayerEntry.timestamp := clock.(Clock.unix_timestamp)
+          |})
+      | None =>
+        let player_entry := {|
+          PlayerEntry.wallet := player_key;
+          PlayerEntry.total_bet := amount;
+          PlayerEntry.timestamp := clock.(Clock.unix_timestamp)
+        |} in
+        game_round <|
+          GameRound.players := player_entry :: game_round.(GameRound.players)
+        |>
+      end in
+
+    (* msg!("Total pot: {} lamports", game_round.initial_pot);
    *)
 
   Result.Ok tt.

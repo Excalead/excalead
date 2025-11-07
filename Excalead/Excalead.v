@@ -24,6 +24,13 @@ Export List.ListNotations.
 Parameter Hash : Set.
 
 Parameter Pubkey : Set.
+Parameter Pubkey_eq : Pubkey -> Pubkey -> bool.
+(* Maybe this should be a module like:
+   Module Pubkey.
+    Parameter t : Set.
+    Parameter eq : t -> t -> bool.
+   End Pubkey.
+*)
 
 Definition u8 : Set := Z.
 Definition u16 : Set := Z.
@@ -58,11 +65,16 @@ Module Account.
   Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
 End Account.
 
+(* TODO Ensure this is correct *)
+Module UncheckedAccount.
+  Parameter t : Set.
+End UncheckedAccount.
+
 Module Signer.
   Parameter t : Set.
 
   Parameter lamports : forall (self : Signer.t), u64.
-  Parameter key : unit -> Pubkey.
+  Parameter key : forall (self : Signer.t), Pubkey.
 End Signer.
 
 Module System.

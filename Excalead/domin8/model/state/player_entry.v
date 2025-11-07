@@ -9,7 +9,7 @@ pub struct PlayerEntry {
     pub timestamp: i64,
 }
 *)
-Module PlayerEntity.
+Module PlayerEntry.
   Record t : Set := {
     wallet: Pubkey;
     total_bet: u64;

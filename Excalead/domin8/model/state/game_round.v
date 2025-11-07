@@ -1,6 +1,8 @@
-Require Import Excalead.Excalead.
+From Excalead Require Import Excalead Vector.
 
-Require Import player_entity.
+Require Import Coq.Lists.List.
+
+Require Import player_entry.
 
 (*
 /// Game status enumeration
@@ -22,7 +24,7 @@ Module GameStatus.
   (*
   pub const LEN: usize = 1; // Enum is 1 byte
   *)
-  Definition LEN: usize = 1.
+  Definition LEN: usize := 1.
 End GameStatus.
 
 (*
@@ -73,7 +75,7 @@ Module GameRound.
   /// = 8 + 8 + 1 + 8 + 4 + 3072 + 8 + 32 + 32 + 32 + 1 = 3206 bytes (~3.1KB)
   pub const LEN: usize = 8 + 8 + GameStatus::LEN + 8 + 4 + (64 * PlayerEntry::LEN) + 8 + 32 + 32 + 32 + 1;
   *)
-  Definition LEN: usize = 8 + 8 + GameStatus.LEN + 8 + 4 + (64 * PlayerEntry.LEN) + 8 + 32 + 32 + 32 + 1.
+  Definition LEN: usize := 8 + 8 + GameStatus.LEN + 8 + 4 + (64 * PlayerEntry.LEN) + 8 + 32 + 32 + 32 + 1.
 
   (*
   /// Check if the game is in a state where players can join
@@ -83,8 +85,8 @@ Module GameRound.
   *)
   Definition can_accept_players (self: GameRound.t) : bool :=
     match self.(GameRound.status) with
-    | GameStatus.Idle | GameStatus.Waiting => True
-    | _ => False
+    | GameStatus.Idle | GameStatus.Waiting => true
+    | _ => false
     end.
   (*
   /// Check if the game is a small game (2+ players) - all games are small games in MVP
@@ -92,7 +94,7 @@ Module GameRound.
       self.players.len() >= 2
   }
   *)
-  Definition is_small_game (self: GameRound.t) : bool
+  Definition is_small_game (self: GameRound.t) : bool :=
     Z.of_nat (List.length self.(GameRound.players)) >=? 2.
 
   (*
@@ -105,8 +107,8 @@ Module GameRound.
       (self: GameRound.t)
       (wallet: Pubkey) :
       option PlayerEntry.t :=
-    List.find_opt
-      (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) =? wallet)
+    List.find
+      (fun (p : PlayerEntry.t) => Pubkey_eq p.(PlayerEntry.wallet) wallet)
       self.(GameRound.players).
 
   (*
@@ -118,11 +120,20 @@ Module GameRound.
   Definition find_player_mut
       (self: GameRound.t)
       (wallet: Pubkey) :
-      option PlayerEntry.t :=
-  (* TODO: Maybe fix faulty annotation (this mut could be a problem) *)
-    List.find_opt
-      (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) =? wallet)
-      self.(GameRound.players).
+      option ((PlayerEntry.t -> PlayerEntry.t) -> GameRound.t) :=
+    match
+      zipper_find
+        (fun (p : PlayerEntry.t) => Pubkey_eq p.(PlayerEntry.wallet) wallet)
+        self.(GameRound.players)
+    with
+    | Some (player, (prefix, suffix)) =>
+        let res handle :=
+          self <|
+            GameRound.players := unzipper (handle player) prefix suffix
+          |>
+        in Some res
+    | None => None
+    end.
 
   (*
   /// Calculate total pot value (just initial pot in small games MVP)
