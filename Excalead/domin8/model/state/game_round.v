@@ -92,8 +92,8 @@ Module GameRound.
       self.players.len() >= 2
   }
   *)
-  Definition is_small_game (self: GameRound.t) : bool.
-  Admitted.
+  Definition is_small_game (self: GameRound.t) : bool
+    Z.of_nat (List.length self.(GameRound.players)) >=? 2.
 
   (*
   /// Get player by wallet address
@@ -101,8 +101,13 @@ Module GameRound.
       self.players.iter().find(|p| p.wallet == *wallet)
   }
   *)
-  Definition find_player (self: GameRound.t) (wallet: Pubkey) : option PlayerEntry.t.
-  Admitted.
+  Definition find_player
+      (self: GameRound.t)
+      (wallet: Pubkey) :
+      option PlayerEntry.t :=
+    List.find_opt
+      (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) =? wallet)
+      self.(GameRound.players).
 
   (*
   /// Get mutable player by wallet address
@@ -110,9 +115,14 @@ Module GameRound.
       self.players.iter_mut().find(|p| p.wallet == *wallet)
   }
   *)
-  Definition find_player_mut (self: GameRound.t) (wallet: Pubkey) : option PlayerEntry.t.
+  Definition find_player_mut
+      (self: GameRound.t)
+      (wallet: Pubkey) :
+      option PlayerEntry.t :=
   (* TODO: Maybe fix faulty annotation (this mut could be a problem) *)
-  Admitted.
+    List.find_opt
+      (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) =? wallet)
+      self.(GameRound.players).
 
   (*
   /// Calculate total pot value (just initial pot in small games MVP)
@@ -120,8 +130,8 @@ Module GameRound.
       self.initial_pot
   }
   *)
-  Definition total_pot (self: GameRound.t) : u64.
-  Admitted.
+  Definition total_pot (self: GameRound.t) : u64 :=
+    self.(GameRound.initial_pot).
 
 End GameRound.
 

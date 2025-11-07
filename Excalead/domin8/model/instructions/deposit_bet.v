@@ -40,7 +40,7 @@ Definition deposit_bet
     (amount: u64) :
     Resylt.t unit :=
   let game_round := ctx.(Context.accounts).(DepositBet.game_round) in
-  let player := ctx.(Context.accounts).(DepositBet.player).(Signer.key) () in
+  let player := Signer.key ctx.(Context.accounts).(DepositBet.player) in
   let? clock := Clock.get in
 
   require!
