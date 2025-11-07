@@ -81,9 +81,11 @@ Module GameRound.
       matches!(self.status, GameStatus::Idle | GameStatus::Waiting)
   }
   *)
-  Definition can_accept_players (self: GameRound.t) : bool.
-  Admitted.
-
+  Definition can_accept_players (self: GameRound.t) : bool :=
+    match self.(GameRound.status) with
+    | GameStatus.Idle | GameStatus.Waiting => True
+    | _ => False
+    end.
   (*
   /// Check if the game is a small game (2+ players) - all games are small games in MVP
   pub fn is_small_game(&self) -> bool {

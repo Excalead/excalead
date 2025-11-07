@@ -62,6 +62,7 @@ Module Signer.
   Parameter t : Set.
 
   Parameter lamports : forall (self : Signer.t), u64.
+  Parameter key : unit -> Pubkey.
 End Signer.
 
 Module System.
