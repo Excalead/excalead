@@ -35,7 +35,7 @@ Parameter AccountInfo : Set.
 Parameter Pubkey : Set.
 
 Parameter Pubkey_eq : EqDec Pubkey.
-#[export] Existing Instance Pubkey_eq.
+#[global] Existing Instance Pubkey_eq.
 
 Definition u8 : Set := Z.
 Definition u16 : Set := Z.
@@ -97,12 +97,11 @@ Module Account.
   Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
 End Account.
 
-(* TODO Ensure this is correct *)
 Module UncheckedAccount.
   Parameter t : Set.
 
   Parameter ToAccountInfo_UncheckedAccount : ToAccountInfo UncheckedAccount.t.
-  #[export] Existing Instance ToAccountInfo_UncheckedAccount.
+  #[global] Existing Instance ToAccountInfo_UncheckedAccount.
 End UncheckedAccount.
 
 Module Signer.
@@ -111,17 +110,17 @@ Module Signer.
   Parameter lamports : forall (self : Signer.t), u64.
 
   Parameter Key_Signer : Key Signer.t.
-  #[export] Existing Instance Key_Signer.
+  #[global] Existing Instance Key_Signer.
 
   Parameter ToAccountInfo_Signer : ToAccountInfo Signer.t.
-  #[export] Existing Instance ToAccountInfo_Signer.
+  #[global] Existing Instance ToAccountInfo_Signer.
 End Signer.
 
 Module System.
   Parameter t : Set.
 
   Parameter ToAccountInfo_System : ToAccountInfo System.t.
-  #[export] Existing Instance ToAccountInfo_System.
+  #[global] Existing Instance ToAccountInfo_System.
 End System.
 
 Module Context.
