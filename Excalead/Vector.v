@@ -40,7 +40,7 @@ Section ZipperFind.
       - apply Forall_cons; eassumption.
       - exists y, prefix, suffix; cbv; fold zipper_find_aux.
         split; [ rewrite Hpred | ]; assumption.
-  Admitted.
+  Qed.
 
 
   Lemma find_spec_some (xs : list T) : Exists (fun x => pred x = true) xs ->
@@ -68,11 +68,15 @@ Section ZipperFind.
 
 
   Lemma find_spec_none (xs : list T) : ~Exists (fun x => pred x = true) xs ->
-    zipper_find xs = None.
+    zipper_find xs = None /\ Forall (fun x => pred x = false) xs.
   Proof.
     intros HnEx.
     apply Forall_Exists_neg in HnEx.
-    apply find_spec_none_aux; [ assumption | constructor ].
+    split.
+    + apply find_spec_none_aux; [ assumption | constructor ].
+    + apply Forall_forall; rewrite Forall_forall in HnEx.
+      intros x HIn.
+      apply Bool.not_true_is_false, HnEx, HIn.
   Qed.
 
   Lemma zipper_spec_aux (xs : list T) : forall ys prefix suffix x,
@@ -92,11 +96,11 @@ Section ZipperFind.
 
   Lemma zipper_spec (xs : list T) :
     match zipper_find xs with
-    | None => True
+    | None => Forall (fun x => pred x = false) xs
     | Some (x, (prefix, suffix)) =>
         xs = unzipper x prefix suffix /\
         pred x = true /\
-        Forall (fun y => pred y = false) prefix
+        Forall (fun x => pred x = false) prefix
     end.
   Proof.
     destruct (Exists_dec (fun x => pred x = true) xs) as [Hex | Hnex].
@@ -106,8 +110,8 @@ Section ZipperFind.
       unfold zipper_find, unzipper in *.
       apply zipper_spec_aux in Heq as [Hres Hpred].
       repeat split; try assumption.
-    + apply find_spec_none in Hnex.
-      now rewrite Hnex.
+    + apply find_spec_none in Hnex as [Heq HFa].
+      rewrite Heq; apply HFa.
   Qed.
 
 End ZipperFind.
