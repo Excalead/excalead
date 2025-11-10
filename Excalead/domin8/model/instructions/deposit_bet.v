@@ -27,6 +27,7 @@ pub struct DepositBet<'info> {
 }
 *)
 Module DepositBet.
+  (* #[derive(Accounts)] *)
   Record t : Set := {
     game_round: GameRound.t;
     vault: UncheckedAccount.t;
@@ -67,50 +68,38 @@ Definition deposit_bet
       amount,
   )?; *)
 
-  (* // Update game state based on current status
-    if game_round.status == GameStatus::Idle {
-        // First player - transition to Waiting
-        game_round.status = GameStatus::Waiting;
-        game_round.start_timestamp = clock.unix_timestamp;
-        game_round.initial_pot = amount;
-        
-        msg!("Game started by first player");
-    } else {
-        // Add to existing pot
-        game_round.initial_pot = game_round.initial_pot.saturating_add(amount);
-     } *)
+  (* // Update game state based on current status *)
+  let game_round :=
+    match game_round.(GameRound.status) with
+    | GameStatus.Idle =>
+      (* // First player - transition to Waiting *)
+      game_round
+        <| GameRound.status := GameStatus.Waiting |>
+        <| GameRound.start_timestamp := clock.(Clock.unix_timestamp) |>
+        <| GameRound.initial_pot := amount  |>
+      (* msg!("Game started by first player"); *)
+    | _ =>
+      (* // Add to existing pot *)
+      game_round
+        <| GameRound.initial_pot :=
+            game_round.(GameRound.initial_pot) + amount |>
+    end in
 
-    (* // Find existing player or add new one
-    if let Some(existing_player) = game_round.find_player_mut(&player_key) {
-        // Player already exists - add to their bet
-        existing_player.total_bet = existing_player.total_bet.saturating_add(amount);
-        existing_player.timestamp = clock.unix_timestamp; // Update timestamp
-        
-        msg!("Updated bet for player: {}, new total: {}", player_key, existing_player.total_bet);
-    } else {
-        // New player
-        let player_entry = PlayerEntry {
-            wallet: player_key,
-            total_bet: amount,
-            timestamp: clock.unix_timestamp,
-        };
-        
-        game_round.players.push(player_entry);
-        
-        msg!("New player joined: {}, bet: {}, total players: {}", 
-             player_key, amount, game_round.players.len());
-    }
-    *)
+    (* // Find existing player or add new one *)
     let game_round :=
       match GameRound.find_player_mut game_round player_key with
       | Some handle =>
         handle (fun existing_player => {|
+            (* // Player already exists - add to their bet *)
             PlayerEntry.wallet := existing_player.(PlayerEntry.wallet);
             PlayerEntry.total_bet :=
               existing_player.(PlayerEntry.total_bet) + amount;
             PlayerEntry.timestamp := clock.(Clock.unix_timestamp)
-          |})
+          |}
+          (* msg!("Updated bet for player: {}, new total: {}", player_key, existing_player.total_bet); *)
+          )
       | None =>
+        (* // New player *)
         let player_entry := {|
           PlayerEntry.wallet := player_key;
           PlayerEntry.total_bet := amount;
@@ -119,9 +108,10 @@ Definition deposit_bet
         game_round <|
           GameRound.players := player_entry :: game_round.(GameRound.players)
         |>
+        (* msg!("New player joined: {}, bet: {}, total players: {}",  *)
+        (*      player_key, amount, game_round.players.len()); *)
       end in
 
-    (* msg!("Total pot: {} lamports", game_round.initial_pot);
-   *)
+    (* msg!("Total pot: {} lamports", game_round.initial_pot); *)
 
   Result.Ok tt.
