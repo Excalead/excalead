@@ -56,17 +56,18 @@ Definition deposit_bet
     Z.of_nat (List.length game_round.(GameRound.players)) <? MAX_PLAYERS with
     "Max Players Reached" in
 
-  (* // Transfer SOL to vault
-  system_program::transfer(
-      CpiContext::new(
-          ctx.accounts.system_program.to_account_info(),
-          system_program::Transfer {
-              from: ctx.accounts.player.to_account_info(),
-              to: ctx.accounts.vault.to_account_info(),
-          },
-      ),
-      amount,
-  )?; *)
+  let? _ :=
+    (* // Transfer SOL to vault *)
+    SystemProgram.transfer
+      (Context.new
+        (System.to_account_info ctx.(Context.accounts).(DepositBet.system_program))
+        ({| SystemProgram.Transfer.from :=
+              Signer.to_account_info ctx.(Context.accounts).(DepositBet.player);
+            SystemProgram.Transfer.to :=
+              UncheckedAccount.to_account_info ctx.(Context.accounts).(DepositBet.vault);
+        |}))
+      amount
+  in
 
   (* // Update game state based on current status *)
   let game_round :=

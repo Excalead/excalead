@@ -23,6 +23,8 @@ Export List.ListNotations.
 
 Parameter Hash : Set.
 
+Parameter AccountInfo : Set.
+
 Parameter Pubkey : Set.
 Parameter Pubkey_eq : Pubkey -> Pubkey -> bool.
 (* Maybe this should be a module like:
@@ -68,6 +70,8 @@ End Account.
 (* TODO Ensure this is correct *)
 Module UncheckedAccount.
   Parameter t : Set.
+  (* Maybe this should be a type class (as in the reference this is a trait) *)
+  Parameter to_account_info : forall (self : UncheckedAccount.t), AccountInfo.
 End UncheckedAccount.
 
 Module Signer.
@@ -75,17 +79,25 @@ Module Signer.
 
   Parameter lamports : forall (self : Signer.t), u64.
   Parameter key : forall (self : Signer.t), Pubkey.
+  (* Maybe this should be a type class (as in the reference this is a trait) *)
+  Parameter to_account_info : forall (self : Signer.t), AccountInfo.
 End Signer.
 
 Module System.
   Parameter t : Set.
+
+  (* Maybe this should be a type class (as in the reference this is a trait) *)
+  Parameter to_account_info : forall (self : System.t), AccountInfo.
 End System.
 
 Module Context.
   Record t {Accounts : Set} : Set := {
+    (* program : AccountInfo; *)
     accounts : Accounts;
   }.
   Arguments t : clear implicits.
+
+  Parameter new : forall {Accounts : Set}, AccountInfo -> Accounts -> Context.t Accounts.
 End Context.
 
 Module Result.
@@ -101,6 +113,19 @@ Module Result.
     | Err e => Err e
     end.
 End Result.
+
+
+Module SystemProgram.
+  Module Transfer.
+    Record t : Set := {
+      from : AccountInfo;
+      to : AccountInfo;
+    }.
+  End Transfer.
+
+  Parameter transfer : forall {Accounts : Set},
+    Context.t Accounts -> u64 -> Result.t unit.
+End SystemProgram.
 
 Notation "'let?' x ':=' e 'in' k" :=
   (Result.bind e (fun x => k))
