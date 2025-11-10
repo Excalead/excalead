@@ -21,9 +21,21 @@ Global Open Scope bool_scope.
 
 Export List.ListNotations.
 
+(* ========================================================================= *)
+(* Base Definitions *)
+
+Class EqDec (X : Type) :=
+  eq : X -> X -> bool.
+Notation "x == y" := (eq x y) (no associativity, at level 70).
+
 Parameter Hash : Set.
 
+Parameter AccountInfo : Set.
+
 Parameter Pubkey : Set.
+
+Parameter Pubkey_eq : EqDec Pubkey.
+#[global] Existing Instance Pubkey_eq.
 
 Definition u8 : Set := Z.
 Definition u16 : Set := Z.
@@ -42,6 +54,33 @@ Parameter f64 : Set.
 
 Parameter bytes : Set.
 
+Module Result.
+  Inductive t (A : Set) :=
+  | Ok : A -> t A
+  | Err : string -> t A.
+  Arguments Ok {A} _.
+  Arguments Err {A} _.
+
+  Definition bind {A B : Set} (result : t A) (f : A -> t B) : t B :=
+    match result with
+    | Ok a => f a
+    | Err e => Err e
+    end.
+End Result.
+
+
+(* ========================================================================= *)
+(* Trait Equivalent Definitions *)
+
+Class Key (X : Type) :=
+  key : forall (self : X), Pubkey.
+
+Class ToAccountInfo (X : Type) :=
+  to_account_info : forall (self : X), AccountInfo.
+
+(* ========================================================================= *)
+(* Module Definitions *)
+
 Module IsWritable.
   Inductive t : Set := Yes | No.
 End IsWritable.
@@ -58,36 +97,65 @@ Module Account.
   Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
 End Account.
 
+Module UncheckedAccount.
+  Parameter t : Set.
+
+  Parameter ToAccountInfo_UncheckedAccount : ToAccountInfo UncheckedAccount.t.
+  #[global] Existing Instance ToAccountInfo_UncheckedAccount.
+End UncheckedAccount.
+
 Module Signer.
   Parameter t : Set.
 
   Parameter lamports : forall (self : Signer.t), u64.
+
+  Parameter Key_Signer : Key Signer.t.
+  #[global] Existing Instance Key_Signer.
+
+  Parameter ToAccountInfo_Signer : ToAccountInfo Signer.t.
+  #[global] Existing Instance ToAccountInfo_Signer.
 End Signer.
 
 Module System.
   Parameter t : Set.
+
+  Parameter ToAccountInfo_System : ToAccountInfo System.t.
+  #[global] Existing Instance ToAccountInfo_System.
 End System.
 
 Module Context.
   Record t {Accounts : Set} : Set := {
+    (* program : AccountInfo; *)
     accounts : Accounts;
   }.
   Arguments t : clear implicits.
+
+  Parameter new : forall {Accounts : Set},
+    AccountInfo -> Accounts -> Context.t Accounts.
 End Context.
 
-Module Result.
-  Inductive t (A : Set) :=
-  | Ok : A -> t A
-  | Err : string -> t A.
-  Arguments Ok {A} _.
-  Arguments Err {A} _.
+Module SystemProgram.
+  Module Transfer.
+    Record t : Set := {
+      from : AccountInfo;
+      to : AccountInfo;
+    }.
+  End Transfer.
 
-  Definition bind {A B : Set} (result : t A) (f : A -> t B) : t B :=
-    match result with
-    | Ok a => f a
-    | Err e => Err e
-    end.
-End Result.
+  Parameter transfer : forall {Accounts : Set},
+    Context.t Accounts -> u64 -> Result.t unit.
+End SystemProgram.
+
+Module Clock.
+  Record t : Set := {
+    unix_timestamp : u64;
+  }.
+
+  Parameter get : Result.t t.
+End Clock.
+
+(* ========================================================================= *)
+(* Notations *)
 
 Notation "'let?' x ':=' e 'in' k" :=
   (Result.bind e (fun x => k))
@@ -111,10 +179,3 @@ Notation "'msg!' message 'in' k" :=
   (let? _ := msg message in k)
   (at level 200, message at level 200, k at level 200).
 
-Module Clock.
-  Record t : Set := {
-    unix_timestamp : u64;
-  }.
-
-  Parameter get : Result.t t.
-End Clock.
