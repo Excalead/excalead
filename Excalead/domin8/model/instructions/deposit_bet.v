@@ -39,7 +39,7 @@ End DepositBet.
 Definition deposit_bet
     (ctx : Context.t DepositBet.t)
     (amount: u64) :
-    Result.t unit :=
+    Result.t GameRound.t :=
   let game_round := ctx.(Context.accounts).(DepositBet.game_round) in
   let player_key := key ctx.(Context.accounts).(DepositBet.player) in
   let? clock := Clock.get in
@@ -115,4 +115,4 @@ Definition deposit_bet
 
     (* msg!("Total pot: {} lamports", game_round.initial_pot); *)
 
-  Result.Ok tt.
+  Result.Ok game_round.
