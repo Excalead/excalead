@@ -41,7 +41,7 @@ Definition deposit_bet
     (amount: u64) :
     Result.t unit :=
   let game_round := ctx.(Context.accounts).(DepositBet.game_round) in
-  let player_key := Signer.key ctx.(Context.accounts).(DepositBet.player) in
+  let player_key := key ctx.(Context.accounts).(DepositBet.player) in
   let? clock := Clock.get in
 
   require!
@@ -60,11 +60,11 @@ Definition deposit_bet
     (* // Transfer SOL to vault *)
     SystemProgram.transfer
       (Context.new
-        (System.to_account_info ctx.(Context.accounts).(DepositBet.system_program))
+        (to_account_info ctx.(Context.accounts).(DepositBet.system_program))
         ({| SystemProgram.Transfer.from :=
-              Signer.to_account_info ctx.(Context.accounts).(DepositBet.player);
+              to_account_info ctx.(Context.accounts).(DepositBet.player);
             SystemProgram.Transfer.to :=
-              UncheckedAccount.to_account_info ctx.(Context.accounts).(DepositBet.vault);
+              to_account_info ctx.(Context.accounts).(DepositBet.vault);
         |}))
       amount
   in

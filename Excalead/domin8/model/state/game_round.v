@@ -108,7 +108,7 @@ Module GameRound.
       (wallet: Pubkey) :
       option PlayerEntry.t :=
     List.find
-      (fun (p : PlayerEntry.t) => Pubkey_eq p.(PlayerEntry.wallet) wallet)
+      (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) == wallet)
       self.(GameRound.players).
 
   (*
@@ -123,7 +123,7 @@ Module GameRound.
       option ((PlayerEntry.t -> PlayerEntry.t) -> GameRound.t) :=
     match
       zipper_find
-        (fun (p : PlayerEntry.t) => Pubkey_eq p.(PlayerEntry.wallet) wallet)
+        (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) == wallet)
         self.(GameRound.players)
     with
     | Some (player, (prefix, suffix)) =>
