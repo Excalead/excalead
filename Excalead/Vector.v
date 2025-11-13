@@ -94,7 +94,7 @@ Section ZipperFind.
         now simpl in Hres.
   Qed.
 
-  Lemma zipper_spec (xs : list T) :
+  Lemma zipper_spec' (xs : list T) :
     match zipper_find xs with
     | None => Forall (fun x => pred x = false) xs
     | Some (x, (prefix, suffix)) =>
@@ -112,6 +112,35 @@ Section ZipperFind.
       repeat split; try assumption.
     + apply find_spec_none in Hnex as [Heq HFa].
       rewrite Heq; apply HFa.
+  Qed.
+
+  Inductive zipper_spec_res (xs : list T) :=
+    | ZipperNone
+        (Hresult : zipper_find xs = None)
+        (HForall : Forall (fun x => pred x = false) xs)
+    | ZipperSome x prefix suffix
+        (Hresult : zipper_find xs = Some (x, (prefix, suffix)))
+        (Hunzip  : xs = unzipper x prefix suffix)
+        (Hpred   : pred x = true)
+        (Hforall : Forall (fun x => pred x = false) prefix)
+    .
+
+  Lemma zipper_spec (xs : list T) : zipper_spec_res xs.
+  Proof.
+    pose proof (zipper_spec' xs) as Hspec.
+    destruct (zipper_find xs) as [[x [prefix suffix]] |] eqn:Hresult.
+    + destruct Hspec as [Hunzip [Hpred HForall]].
+      eapply ZipperSome; eassumption.
+    + apply ZipperNone; assumption.
+  Qed.
+
+  Lemma unzipper_length (x y : T) prefix suffix :
+    length (unzipper y prefix suffix) = length (unzipper x prefix suffix).
+  Proof.
+    unfold unzipper.
+    repeat rewrite rev_append_rev.
+    repeat rewrite length_app.
+    f_equal.
   Qed.
 
 End ZipperFind.

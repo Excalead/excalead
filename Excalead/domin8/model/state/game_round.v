@@ -3,6 +3,7 @@ From Excalead Require Import Excalead Vector.
 Require Import Coq.Lists.List.
 
 Require Import player_entry.
+Require Import Excalead.domin8.model.constants.
 
 (*
 /// Game status enumeration
@@ -65,6 +66,12 @@ Module GameRound.
     vrf_seed: Hash;
     randomness_fulfielled: bool;
   }.
+
+  Module Valid.
+    Record t (self : GameRound.t) : Prop := {
+      players_len : Z.of_nat (List.length self.(players)) <= MAX_PLAYERS;
+    }.
+  End Valid.
 
   (*
   /// Account space calculation for small games MVP with ORAO VRF:
