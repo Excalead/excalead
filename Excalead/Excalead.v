@@ -35,7 +35,7 @@ Parameter AccountInfo : Set.
 Parameter Pubkey : Set.
 
 Parameter Pubkey_eq : EqDec Pubkey.
-#[global] Existing Instance Pubkey_eq.
+#[export] Existing Instance Pubkey_eq.
 
 Definition u8 : Set := Z.
 Definition u16 : Set := Z.
@@ -96,13 +96,15 @@ End IsOptional.
 Module Account.
   Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
 End Account.
+Export Account.
 
 Module UncheckedAccount.
   Parameter t : Set.
 
   Parameter ToAccountInfo_UncheckedAccount : ToAccountInfo UncheckedAccount.t.
-  #[global] Existing Instance ToAccountInfo_UncheckedAccount.
+  #[export] Existing Instance ToAccountInfo_UncheckedAccount.
 End UncheckedAccount.
+Export UncheckedAccount.
 
 Module Signer.
   Parameter t : Set.
@@ -110,18 +112,20 @@ Module Signer.
   Parameter lamports : forall (self : Signer.t), u64.
 
   Parameter Key_Signer : Key Signer.t.
-  #[global] Existing Instance Key_Signer.
+  #[export] Existing Instance Key_Signer.
 
   Parameter ToAccountInfo_Signer : ToAccountInfo Signer.t.
-  #[global] Existing Instance ToAccountInfo_Signer.
+  #[export] Existing Instance ToAccountInfo_Signer.
 End Signer.
+Export Signer.
 
 Module System.
   Parameter t : Set.
 
   Parameter ToAccountInfo_System : ToAccountInfo System.t.
-  #[global] Existing Instance ToAccountInfo_System.
+  #[export] Existing Instance ToAccountInfo_System.
 End System.
+Export System.
 
 Module Context.
   Record t {Accounts : Set} : Set := {
@@ -133,6 +137,7 @@ Module Context.
   Parameter new : forall {Accounts : Set},
     AccountInfo -> Accounts -> Context.t Accounts.
 End Context.
+Export Context.
 
 Module SystemProgram.
   Module Transfer.
