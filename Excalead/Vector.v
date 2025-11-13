@@ -114,7 +114,7 @@ Section ZipperFind.
       rewrite Heq; apply HFa.
   Qed.
 
-  Inductive zipper_spec_res (xs : list T) :=
+  Inductive zipper_spec_res (xs : list T) : Set :=
     | ZipperNone
         (Hresult : zipper_find xs = None)
         (HForall : Forall (fun x => pred x = false) xs)
@@ -129,9 +129,10 @@ Section ZipperFind.
   Proof.
     pose proof (zipper_spec' xs) as Hspec.
     destruct (zipper_find xs) as [[x [prefix suffix]] |] eqn:Hresult.
-    + destruct Hspec as [Hunzip [Hpred HForall]].
+    { destruct Hspec as [Hunzip [Hpred HForall]].
       eapply ZipperSome; eassumption.
-    + apply ZipperNone; assumption.
+    }
+    { apply ZipperNone; assumption. }
   Qed.
 
   Lemma unzipper_length (x y : T) prefix suffix :
