@@ -114,7 +114,7 @@ Section ZipperFind.
       rewrite Heq; apply HFa.
   Qed.
 
-  Inductive zipper_spec_res (xs : list T) : Set :=
+  Inductive zipper_spec_res (xs : list T) : Prop :=
     | ZipperNone
         (Hresult : zipper_find xs = None)
         (HForall : Forall (fun x => pred x = false) xs)
