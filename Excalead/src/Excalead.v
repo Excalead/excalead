@@ -1,4 +1,3 @@
-
 Require Export Coq.PArith.BinPosDef.
 Require Export Coq.Strings.PrimString.
 Require Export Coq.ZArith.ZArith.
