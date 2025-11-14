@@ -23,10 +23,10 @@
   (bug_reports "https://github.com/Excalead/excalead/issues")
   (homepage "https://github.com/Excalead/excalead")
   (depends
-    (coq (>= 8.20.0 ))
+    (coq         (>= 8.20.0 ))
     (coq-coqutil (>= 0.0.5))
-    coq-hammer
-    coq-smpl)
+     coq-hammer
+     coq-smpl)
   (allow_empty))
 
 
