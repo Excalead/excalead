@@ -36,8 +36,8 @@ jobs:
       - name: Generate Rocq from IDL
         run: |
           cargo run --manifest-path src/Cargo.toml --bin idl-to-rocq -- \
-            Excalead/new.json \
-            -o Excalead/new_idl.v
+            Excalead/secure/new.json \
+            -o Excalead/secure/new_idl.v
 
       - name: Make a Git diff
         run: |
