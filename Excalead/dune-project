@@ -1,0 +1,34 @@
+(lang dune 3.10)
+(using coq 0.8)
+
+(generate_opam_files)
+
+(name rocq-excalead)
+(version 0.1.0)
+
+(authors
+  "Formal Land <contact@formal.land>")
+
+(maintainers
+  "Guillaume Claret <dev@clarus.me>")
+
+(source
+  (github Excalead/excalead))
+
+(package
+  (name rocq-excalead)
+  (synopsis "Excalead")
+  (description "Formal representation of Solana smart contracts")
+  (license MIT)
+  (bug_reports "https://github.com/Excalead/excalead/issues")
+  (homepage "https://github.com/Excalead/excalead")
+  (depends
+    (coq         (>= 8.20.0 ))
+    (coq-coqutil (>= 0.0.5))
+     coq-hammer
+     coq-smpl)
+  (allow_empty))
+
+
+
+

@@ -2,9 +2,9 @@
 (* Modifed from: https://github.com/mit-plv/riscv-coq/blob/3a4ddc56fce50c0167fbe887987086fcc157153c/src/riscv/Utility/RecordSetters.v *)
 
 Require Import Coq.Program.Basics.
-Require Import Ltac2.Ltac2.
+From Ltac2 Require Import Ltac2 Bool.
 Require Ltac2.Option.
-Require Import Ltac2.Bool.
+
 Set Default Proof Mode "Classic".
 
 Ltac2 rec strip_foralls (t : constr) :=

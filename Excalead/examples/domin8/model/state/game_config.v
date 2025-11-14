@@ -1,4 +1,4 @@
-From Excalead Require Import Excalead.
+From Excalead Require Import Excalead Anchor_lang.
 
 (*
 /// Configuration for game durations
