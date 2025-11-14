@@ -1,0 +1,45 @@
+name: Coq CI (dune)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-coq:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Excalead
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml + opam
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 4.14.2
+          opam-depext: true
+          opam-disable-sandboxing: true
+
+      - name: Cache opam
+        uses: actions/cache@v4
+        with:
+          path: ~/.opam
+          key: opam-${{ runner.os }}-${{ hashFiles('Excalead/dune-project', 'Excalead/*.opam', 'Excalead/**/*.opam') }}
+          restore-keys: |
+            opam-${{ runner.os }}-
+
+      - name: Install Coq and project dependencies
+        run: |
+          eval $(opam env)
+          opam install -y coq.8.20.0 dune
+          opam install -y . --deps-only
+
+      - name: Build Coq project with dune
+        run: |
+          eval $(opam env)
+          dune build
