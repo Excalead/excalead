@@ -118,7 +118,7 @@ Definition deposit_bet
   Result.Ok game_round.
 
 Lemma deposit_bet_is_valid (ctx : Context.t DepositBet.t) (amount : u64)
-    (H_param1 : GameRound.Valid.t ctx.(Context.accounts).(DepositBet.game_round)) :
+    (G_game_round : GameRound.Valid.t ctx.(Context.accounts).(DepositBet.game_round)) :
   match deposit_bet ctx amount with
   | Result.Ok (result1) => GameRound.Valid.t result1
   | Result.Err _ => True
@@ -142,15 +142,17 @@ Proof.
     set (pred:=pred'); clearbody pred;
     destruct (Vector.zipper_spec pred vec')
   end.
-  + (* If GameRound.find_player_mut didn't find the player *)
+  { (* If GameRound.find_player_mut didn't find the player *)
     rewrite Hresult.
     constructor.
     simpl; lia.
-  + (* If GameRound.find_player_mut did find the player *)
+  }
+  { (* If GameRound.find_player_mut did find the player *)
     rewrite Hresult.
     constructor.
     simpl.
     rewrite unzipper_length with (x := x), <- Hunzip.
     lia.
+  }
 Qed.
 
