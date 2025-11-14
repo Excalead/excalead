@@ -1,9 +1,9 @@
-From Excalead Require Import Excalead Vector.
+From Excalead Require Import Excalead Vector Anchor_lang.
 
 Require Import Coq.Lists.List.
 
 Require Import player_entry.
-Require Import Excalead.domin8.model.constants.
+Require Import domin8.constants.
 
 (*
 /// Game status enumeration
