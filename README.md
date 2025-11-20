@@ -61,8 +61,8 @@ graph TD
     HighLevel --->|Equivalence Proof| Rocq
 ```
 
-1. **Lifting**: We translate the smart contract source code into a Rocq model calling axiomatized Anchor primitives. This translation can be done quickly thanks to the widespread use of AI, and we verify it with snapshot testing to make sure it behaves as the original code.
-2. **Specification**: We define a Higher-Level Model of the code to give the expected behavior, with exact arithmetic (real numbers) and a unified state (no PDAs), for example. This helps describing the intended behavior of the code, and check for common vulnerabilities, like incorrect rounding or account validation.
+1. **Lifting**: We translate the smart contract source code into a Rocq model, calling axiomatized Anchor primitives. This translation can be done quickly thanks to the widespread use of AI, and we verify it with snapshot testing to make sure it behaves as the original code.
+2. **Specification**: We define a Higher-Level Model of the code to give the expected behavior, with exact arithmetic (real numbers) and a unified state (no PDAs), for example. This helps describe the intended behavior of the code, and checks for common vulnerabilities, like incorrect rounding or account validation.
 3. **Verification**: We check that the higher-level model is mathematically equivalent to the Rocq model of the source, and verify custom invariants corresponding to the business logic of the smart contract.
 
 ## 🚀 Key Features
@@ -81,8 +81,13 @@ graph TD
 
 Excalead is designed to augment, but not replace, the security auditing done by humans.
 
-- For **Developers**: You get a quicker and more reliable feedback on the security of your smart contracts.
+- For **Developers**: You get quicker and more reliable feedback on the security of your smart contracts.
 - For **Auditors**: Use the Excalead framework to mathematically verify complex properties and follow the evolutions of the smart contracts you verify.
+
+## ✔️ Audited
+
+- [🐖 PiggyBank](https://www.piggybank.fi/)
+- [⚔️ Domin8](https://x.com/domin8Arena)
 
 ## 📬 Contact & Status
 
