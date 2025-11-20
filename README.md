@@ -65,6 +65,10 @@ graph TD
 2. **Specification**: We define a Higher-Level Model of the code to give the expected behavior, with exact arithmetic (real numbers) and a unified state (no PDAs), for example. This helps describe the intended behavior of the code, and checks for common vulnerabilities, like incorrect rounding or account validation.
 3. **Verification**: We check that the higher-level model is mathematically equivalent to the Rocq model of the source, and verify custom invariants corresponding to the business logic of the smart contract.
 
+A critical part is verifying that the Rocq model is equivalent to the smart contract code in Rust by testing. Our approach is to serialize everything in JSON back and forth between Rocq and Rust, to check by snapshot testing that our model corresponds to the implementation:
+
+![Export to JSON](./static/json.png)
+
 ## 🚀 Key Features
 
 - **Automated** and **Lightweight Formal Methods**: No need to go down to the implementation details of Rust, verify a higher-level model of your code instead. A full verification can always be done later, reusing the same models.
