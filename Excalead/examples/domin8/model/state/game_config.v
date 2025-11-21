@@ -90,4 +90,3 @@ Module GameConfig.
   Definition is_valid_bet_amount (self: GameConfig.t) (amount: u64) : bool :=
     amount >=? self.(GameConfig.min_bet_lamports).
 End GameConfig.
-
