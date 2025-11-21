@@ -17,7 +17,6 @@ Module GameDurationConfig.
   Definition LEN : usize := 8 + 8 + 8 + 8.
 End GameDurationConfig.
 
-
 (*
 /// Global game configuration stored as singleton PDA
 /// Seeds: [b"game_config"]
@@ -55,7 +54,8 @@ Module GameConfig.
   /// + 8 (vrf_fee) + 32 (vrf_network_state) + 32 (vrf_treasury) = 218 bytes
   pub const LEN: usize = 8 + 32 + 32 + 2 + 8 + GameDurationConfig::LEN + GameDurationConfig::LEN + 8 + 32 + 32;
   *)
-  Definition LEN: usize := 8 + 32 + 32 + 2 + 8 + GameDurationConfig.LEN + GameDurationConfig.LEN + 8 + 32 + 32.
+  Definition LEN: usize :=
+    8 +i 32 +i 32 +i 2 +i 8 +i GameDurationConfig.LEN +i GameDurationConfig.LEN +i 8 +i 32 +i 32.
 
   (*
   /// Calculate house fee from pot amount
@@ -66,11 +66,11 @@ Module GameConfig.
   }
   *)
   Definition calculate_house_fee (self: GameConfig.t) (pot_amount: u64) : u64 :=
-    let house_fee_basis_points_as_u64 :=
-      self.(GameConfig.house_fee_basis_points) : u64 in
-    Z.div
-      (Z.mul pot_amount house_fee_basis_points_as_u64)
-      10000.
+    (
+      pot_amount *is
+      (self.(GameConfig.house_fee_basis_points).(Integer.value) : u64)
+    ) /is
+    10_000.
 
   (*
   /// Calculate winner payout after house fee
@@ -79,7 +79,7 @@ Module GameConfig.
   }
   *)
   Definition calculate_winner_payout (self: GameConfig.t) (pot_amount: u64) : u64 :=
-    Z.sub pot_amount (calculate_house_fee self pot_amount).
+    pot_amount -is calculate_house_fee self pot_amount.
 
   (*
   /// Validate if a bet amount meets minimum requirements
@@ -88,5 +88,5 @@ Module GameConfig.
   }
   *)
   Definition is_valid_bet_amount (self: GameConfig.t) (amount: u64) : bool :=
-    amount >=? self.(GameConfig.min_bet_lamports).
+    amount >=i self.(GameConfig.min_bet_lamports).
 End GameConfig.
