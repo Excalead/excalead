@@ -2,8 +2,8 @@ From Excalead Require Import Excalead Vector Anchor_lang.
 
 Require Import Coq.Lists.List.
 
-Require Import player_entry.
-Require Import domin8.constants.
+Require Import state.player_entry.
+Require Import constants.
 
 (*
 /// Game status enumeration
@@ -141,7 +141,7 @@ Module GameRound.
 
   Module Valid.
     Record t (self : GameRound.t) : Prop := {
-      players_len : Z.of_nat (List.length self.(players)) <= MAX_PLAYERS;
+      players_len : Z.of_nat (List.length self.(players)) <= MAX_PLAYERS.(Integer.value);
     }.
   End Valid.
 
@@ -154,7 +154,8 @@ Module GameRound.
   /// = 8 + 8 + 1 + 8 + 4 + 3072 + 8 + 32 + 32 + 32 + 1 = 3206 bytes (~3.1KB)
   pub const LEN: usize = 8 + 8 + GameStatus::LEN + 8 + 4 + (64 * PlayerEntry::LEN) + 8 + 32 + 32 + 32 + 1;
   *)
-  Definition LEN: usize := 8 + 8 + GameStatus.LEN + 8 + 4 + (64 * PlayerEntry.LEN) + 8 + 32 + 32 + 32 + 1.
+  Definition LEN: usize :=
+    8 +i 8 +i GameStatus.LEN +i 8 +i 4 +i (64 *i PlayerEntry.LEN) +i 8 +i 32 +i 32 +i 32 +i 1.
 
   (*
   /// Check if the game is in a state where players can join

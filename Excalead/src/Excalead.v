@@ -21,6 +21,7 @@ Global Open Scope list_scope.
 Global Open Scope type_scope.
 Global Open Scope Z_scope.
 Global Open Scope bool_scope.
+Global Open Scope pstring_scope.
 
 Export List.ListNotations.
 
