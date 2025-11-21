@@ -77,7 +77,7 @@ End SystemProgram.
 
 Module Clock.
   Record t : Set := {
-    unix_timestamp : u64;
+    unix_timestamp : i64;
   }.
 
   Parameter get : Result.t t.

@@ -1,4 +1,4 @@
-Require Import Excalead.Excalead.
+From Excalead Require Import Excalead Anchor_lang.
 
 (** Error codes *)
 Module ErrorCode.

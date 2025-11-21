@@ -1,4 +1,4 @@
-Require Import Excalead.Excalead.
+From Excalead Require Import Excalead Anchor_lang.
 
 (** Constants *)
 (* [116, 101, 115, 116] *)
