@@ -112,4 +112,28 @@ Module StreamData.
         |}
       |>
       <| StreamData.was_canceled := false |>.
+
+  Definition withdraw
+      (self : t)
+      (amount: u64) :
+      Result.t t :=
+    let? withdrawn :=
+      match self.(amounts).(Amounts.withdrawn) +i? amount with
+      | Some withdrawn => Result.Ok withdrawn
+      | None => Result.Err "Withdrawn amount overflow"
+      end
+    in
+    let '(is_cancelable, is_depleted) :=
+      if withdrawn >=i self.(amounts).(Amounts.deposited) -i self.(amounts).(Amounts.refunded) then
+        (false, true)
+      else
+        (self.(is_cancelable), self.(is_depleted))
+    in
+    Result.Ok (self
+      <| StreamData.amounts := self.(amounts)
+        <| Amounts.withdrawn := withdrawn |>
+      |>
+      <| StreamData.is_cancelable := is_cancelable |>
+      <| StreamData.is_depleted := is_depleted |>
+    ).
 End StreamData.

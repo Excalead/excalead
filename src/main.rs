@@ -40,7 +40,8 @@ fn generate_rocq(idl: &Idl) -> String {
     let mut output = String::new();
 
     // Header
-    output.push_str("Require Import Excalead.Excalead.\n\n");
+    output.push_str("(* Generated file *)\n");
+    output.push_str("From Excalead Require Import Excalead Anchor_lang.\n\n");
 
     // Constants
     if !idl.constants.is_empty() {

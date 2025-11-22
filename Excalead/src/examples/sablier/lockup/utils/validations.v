@@ -93,3 +93,10 @@ Proof.
     ).
   }
 Qed.
+
+Definition check_withdraw (is_depleted : bool) (amount : u64) (withdrawable_amount : u64) :
+    Result.t unit :=
+  let? _ := assert_not is_depleted ErrorCode.StreamDepleted in
+  let? _ := assert_not (amount =i 0) ErrorCode.WithdrawAmountZero in
+  let? _ := assert_not (amount >i withdrawable_amount) ErrorCode.Overdraw in
+  Result.Ok tt.

@@ -99,6 +99,13 @@ Module Integer.
       max kind
     else
       z.
+
+  Definition cast
+      {kind_source : IntegerKind.t}
+      (i : Integer.t kind_source)
+      (kind_target : IntegerKind.t) :
+      Integer.t kind_target :=
+    {| Integer.value := normalize_wrap kind_source i.(Integer.value) |}.
 End Integer.
 
 Definition u8 : Set := Integer.t IntegerKind.U8.
@@ -292,6 +299,8 @@ Notation "a '/is' b" := (BinOp.Saturating.div a b) (at level 40, left associativ
 Notation "a '%is' b" := (BinOp.Saturating.rem a b) (at level 40, left associativity).
 Notation "a '<<is' b" := (BinOp.Saturating.shl a b) (at level 40, left associativity).
 Notation "a '>>is' b" := (BinOp.Saturating.shr a b) (at level 40, left associativity).
+
+Notation "a 'ias' b" := (Integer.cast a b) (at level 50, left associativity).
 
 #[warnings="-uniform-inheritance"]
 Coercion Integer_of_Z {kind : IntegerKind.t} (z : Z) : Integer.t kind := {| Integer.value := z |}.
