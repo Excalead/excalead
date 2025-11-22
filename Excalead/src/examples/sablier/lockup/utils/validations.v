@@ -40,8 +40,10 @@ Definition check_create
 
 (** If the [check_create] function succeeds, then we will make a valid [StreamData] element. *)
 Lemma check_create_is_valid
-    stream_data deposit_token_mint bump salt is_cancelable sender
-    deposit_amount start_time cliff_time end_time start_unlock_amount cliff_unlock_amount
+    stream_data deposit_token_mint bump
+    cliff_time cliff_unlock_amount deposit_amount end_time
+    salt is_cancelable sender
+    start_time start_unlock_amount
     (H_bump : Integer.Valid.t bump)
     (H_salt : Integer.Valid.t salt)
     (H_deposit_amount : Integer.Valid.t deposit_amount)
@@ -55,7 +57,7 @@ Lemma check_create_is_valid
       deposit_amount start_time cliff_time end_time start_unlock_amount cliff_unlock_amount
   with
   | Result.Err _ => True
-  | Result.Ok tt =>
+  | Result.Ok _ =>
     StreamData.Valid.t (
       StreamData.create
         stream_data deposit_token_mint bump

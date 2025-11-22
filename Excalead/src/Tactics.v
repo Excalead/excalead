@@ -47,6 +47,10 @@ Require Import Anchor_lang.
 (*   (bind_prop_relaxed X (fun x ⇒ Y)) *)
 (*   (at level 200, x pattern, X at level 100, Y at level 200). *)
 
+Notation "'letP?' x ':=' X 'in' Y" :=
+  (match X with Result.Err _ => True | Result.Ok x => Y end)
+  (at level 200, x pattern, X at level 100, Y at level 200).
+
 (** Destruct the matched value in an expression [e]. *)
 Ltac destruct_match_in e :=
   lazymatch e with
