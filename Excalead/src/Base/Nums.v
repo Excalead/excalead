@@ -62,6 +62,12 @@ Module Integer.
     end.
   Global Hint Unfold max : coq_of_rust_z.
 
+  Module Valid.
+    Definition t {kind : IntegerKind.t} (self : Integer.t kind) : Prop :=
+      Integer.min kind <= self.(Integer.value) <= Integer.max kind.
+    Arguments t _ /.
+  End Valid.
+
   Definition normalize_wrap (kind : IntegerKind.t) (z : Z) : Z :=
     match kind with
     | IntegerKind.U8 => Z.modulo z (2^8)
@@ -133,21 +139,27 @@ End UnOp.
 Module BinOp.
   Definition eq {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     Z.eqb a.(Integer.value) b.(Integer.value).
+  Arguments eq /.
 
   Definition ne {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     negb (Z.eqb a.(Integer.value) b.(Integer.value)).
+  Arguments ne /.
 
   Definition lt {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     Z.ltb a.(Integer.value) b.(Integer.value).
+  Arguments lt /.
 
   Definition le {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     Z.leb a.(Integer.value) b.(Integer.value).
+  Arguments le /.
 
   Definition gt {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     Z.gtb a.(Integer.value) b.(Integer.value).
+  Arguments gt /.
 
   Definition ge {kind : IntegerKind.t} (a b : Integer.t kind) : bool :=
     Z.geb a.(Integer.value) b.(Integer.value).
+  Arguments ge /.
 
   Module Wrap.
     Definition make_arithmetic
