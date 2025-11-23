@@ -14,12 +14,15 @@ Module Amounts.
       start_unlock_valid : Integer.Valid.t self.(start_unlock);
       cliff_unlock_valid : Integer.Valid.t self.(cliff_unlock);
       deposited_valid : Integer.Valid.t self.(deposited);
-      deposited_not_null : self.(deposited).(Integer.value) <> 0;
+      deposited_not_null : i[self.(deposited)] <> 0;
       refunded_valid : Integer.Valid.t self.(refunded);
       withdrawn_valid : Integer.Valid.t self.(withdrawn);
       total_unlock :
-        self.(start_unlock).(Integer.value) + self.(cliff_unlock).(Integer.value) <=
-        self.(deposited).(Integer.value)
+        i[self.(start_unlock)] + i[self.(cliff_unlock)] <=
+        i[self.(deposited)];
+      deposited_refunded_withdrawn :
+        i[self.(refunded)] + i[self.(withdrawn)] <=
+        i[self.(deposited)];
     }.
   End Valid.
 End Amounts.
@@ -36,15 +39,15 @@ Module Timestamps.
       cliff_valid : Integer.Valid.t self.(cliff);
       end_valid : Integer.Valid.t self.(end_);
       start_valid : Integer.Valid.t self.(start);
-      start_not_null : self.(start).(Integer.value) <> 0;
+      start_not_null : i[self.(start)] <> 0;
       start_before_end :
-        self.(start).(Integer.value) < self.(end_).(Integer.value);
+        i[self.(start)] < i[self.(end_)];
       start_before_cliff :
-        self.(cliff).(Integer.value) <> 0 ->
-        self.(start).(Integer.value) < self.(cliff).(Integer.value);
+        i[self.(cliff)] <> 0 ->
+        i[self.(start)] < i[self.(cliff)];
       cliff_before_end :
-        self.(cliff).(Integer.value) <> 0 ->
-        self.(cliff).(Integer.value) < self.(end_).(Integer.value);
+        i[self.(cliff)] <> 0 ->
+        i[self.(cliff)] < i[self.(end_)];
     }.
   End Valid.
 End Timestamps.
@@ -69,8 +72,8 @@ Module StreamData.
       salt_valid : Integer.Valid.t self.(salt);
       timestamps_valid : Timestamps.Valid.t self.(timestamps);
       cliff_zeros :
-        self.(timestamps).(Timestamps.cliff).(Integer.value) = 0 ->
-        self.(amounts).(Amounts.cliff_unlock).(Integer.value) = 0;
+        i[self.(timestamps).(Timestamps.cliff)] = 0 ->
+        i[self.(amounts).(Amounts.cliff_unlock)] = 0;
     }.
   End Valid.
 

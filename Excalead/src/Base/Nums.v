@@ -302,5 +302,8 @@ Notation "a '>>is' b" := (BinOp.Saturating.shr a b) (at level 40, left associati
 
 Notation "a 'ias' b" := (Integer.cast a b) (at level 50, left associativity).
 
+(* Projection *)
+Notation "i[ x ]" := (Integer.value x) (at level 30, left associativity).
+
 #[warnings="-uniform-inheritance"]
 Coercion Integer_of_Z {kind : IntegerKind.t} (z : Z) : Integer.t kind := {| Integer.value := z |}.

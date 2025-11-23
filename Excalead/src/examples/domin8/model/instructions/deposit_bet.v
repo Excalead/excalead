@@ -131,7 +131,7 @@ Proof.
   | |- context [ GameRound.find_player_mut ?game_round _ ] =>
     remember game_round as game_round' eqn:HeqGameRound;
     assert (Hgame_round'_length:
-        Z.of_nat (Datatypes.length game_round'.(GameRound.players)) < MAX_PLAYERS.(Integer.value)
+        Z.of_nat (Datatypes.length game_round'.(GameRound.players)) < i[MAX_PLAYERS]
     )
   end. {
     subst.

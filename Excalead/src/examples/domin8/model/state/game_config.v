@@ -132,7 +132,7 @@ Module GameConfig.
   Definition calculate_house_fee (self: GameConfig.t) (pot_amount: u64) : u64 :=
     (
       pot_amount *is
-      (self.(GameConfig.house_fee_basis_points).(Integer.value) : u64)
+      (i[self.(GameConfig.house_fee_basis_points)] : u64)
     ) /is
     10_000.
 

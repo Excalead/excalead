@@ -141,7 +141,7 @@ Module GameRound.
 
   Module Valid.
     Record t (self : GameRound.t) : Prop := {
-      players_len : Z.of_nat (List.length self.(players)) <= MAX_PLAYERS.(Integer.value);
+      players_len : Z.of_nat (List.length self.(players)) <= i[MAX_PLAYERS];
     }.
   End Valid.
 
