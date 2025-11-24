@@ -10,6 +10,7 @@ Require Utility.Vector.
 Require Export Lia.
 From Hammer Require Export Tactics.
 Require Export smpl.Smpl.
+From JSON Require Export JSON Encode Decode.
 
 (* Activate the modulo arithmetic in [lia] *)
 Ltac Zify.zify_post_hook ::= Z.to_euclidean_division_equations.

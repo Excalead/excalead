@@ -59,15 +59,15 @@ Module Context.
   Arguments t : clear implicits.
 
   Parameter new : forall {Accounts : Set},
-    AccountInfo -> Accounts -> Context.t Accounts.
+    AccountInfo.t -> Accounts -> Context.t Accounts.
 End Context.
 Export Context.
 
 Module SystemProgram.
   Module Transfer.
     Record t : Set := {
-      from : AccountInfo;
-      to : AccountInfo;
+      from : AccountInfo.t;
+      to : AccountInfo.t;
     }.
   End Transfer.
 

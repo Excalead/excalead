@@ -15,7 +15,25 @@ Module GameDurationConfig.
   pub const LEN: usize = 8 + 8 + 8 + 8; // 32 bytes
   *)
   Definition LEN : usize := 8 + 8 + 8 + 8.
+
+  #[export]
+  Instance GameDurationConfig_JEncode : JEncode GameDurationConfig.t :=
+    fun x => JSON__Object [
+      ("waiting_phase_duration", encode x.(waiting_phase_duration)) ].
+
+  #[export]
+  Instance GameDurationConfig_JDecode : JDecode GameDurationConfig.t :=
+    fun j => match j with
+    | JSON__Object [("waiting_phase_duration", waiting_phase_duration_json)] =>
+      decode waiting_phase_duration_json >>= fun waiting_phase_duration =>
+      inr {| waiting_phase_duration := waiting_phase_duration |}
+    | _ =>
+      inl "Failed to decode GameDurationConfig"
+    end.
+
 End GameDurationConfig.
+Export (hints) GameDurationConfig.
+
 
 
 (*
@@ -37,16 +55,63 @@ pub struct GameConfig {
 *)
 Module GameConfig.
   Record t : Set := {
-    authority: Pubkey;
-    treasury: Pubkey;
+    authority: Pubkey.t;
+    treasury: Pubkey.t;
     house_fee_basis_points: u16;
     min_bet_lamports: u64;
     small_game_duration_config: GameDurationConfig.t;
 
     vrf_fee_lamports: u64;
-    vrf_network_state: Pubkey;
-    vrf_treasury: Pubkey;
+    vrf_network_state: Pubkey.t;
+    vrf_treasury: Pubkey.t;
   }.
+
+  #[export]
+  Instance GameConfig_JEncode : JEncode GameConfig.t :=
+    fun x =>
+      JSON__Object [
+        ("authority", encode x.(authority));
+        ("treasure", encode x.(treasury));
+        ("house_fee_basis_points", encode x.(house_fee_basis_points));
+        ("min_bet_lamports", encode x.(min_bet_lamports));
+        ("small_game_duration_config", encode x.(small_game_duration_config));
+        ("vrf_fee_lamports", encode x.(vrf_fee_lamports));
+        ("vrf_network_state", encode x.(vrf_network_state));
+        ("vrf_treasury", encode x.(vrf_treasury))
+      ].
+
+  #[export]
+  Instance GameConfig_JDecode : JDecode GameConfig.t :=
+    fun j => match j with
+      | JSON__Object [
+          ("authority", authority_json);
+          ("treasure", treasury_json);
+          ("house_fee_basis_points", house_fee_basis_points_json);
+          ("min_bet_lamports", min_bet_lamports_json);
+          ("small_game_duration_config", small_game_duration_config_json);
+          ("vrf_fee_lamports", vrf_fee_lamports_json);
+          ("vrf_network_state", vrf_network_state_json);
+          ("vrf_treasury", vrf_treasury_json) ] =>
+        decode authority_json >>= fun authority =>
+        decode treasury_json >>= fun treasury =>
+        decode house_fee_basis_points_json >>= fun house_fee_basis_points =>
+        decode min_bet_lamports_json >>= fun min_bet_lamports =>
+        decode small_game_duration_config_json >>= fun small_game_duration_config =>
+        decode vrf_fee_lamports_json >>= fun vrf_fee_lamports =>
+        decode vrf_network_state_json >>= fun vrf_network_state =>
+        decode vrf_treasury_json >>= fun vrf_treasury =>
+        inr {| authority := authority;
+               treasury := treasury;
+               house_fee_basis_points := house_fee_basis_points;
+               min_bet_lamports := min_bet_lamports;
+               small_game_duration_config := small_game_duration_config;
+               vrf_fee_lamports := vrf_fee_lamports;
+               vrf_network_state := vrf_network_state;
+               vrf_treasury := vrf_treasury |}
+    | _ => inl "Failed to decode GameConfig"
+    end
+        .
+
 
   (*
   /// Account space calculation:
@@ -90,3 +155,4 @@ Module GameConfig.
   Definition is_valid_bet_amount (self: GameConfig.t) (amount: u64) : bool :=
     amount >=? self.(GameConfig.min_bet_lamports).
 End GameConfig.
+Export (hints) GameConfig.
