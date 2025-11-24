@@ -1,4 +1,4 @@
-Require Import Coq.Strings.PrimString.
+Require Export Coq.Strings.String.
 
 Inductive t (A : Set) :=
 | Ok : A -> t A

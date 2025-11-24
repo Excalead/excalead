@@ -26,7 +26,28 @@ Module GameStatus.
   pub const LEN: usize = 1; // Enum is 1 byte
   *)
   Definition LEN: usize := 1.
+
+  #[export]
+  Instance GameStatus_JEncode : JEncode GameStatus.t :=
+    fun x => match x with
+    | Idle => encode "Idle"
+    | Waiting => encode "Waiting"
+    | AwaitingWinnerRandomness => encode "AwaitWinnerRandomness"
+    | Finished => encode "Finished"
+    end.
+
+  #[export]
+  Instance GameStatus_JDecode : JDecode GameStatus.t :=
+    fun j => match decode j with
+      | inr "Idle" => inr Idle
+      | inr "Waiting" => inr Waiting
+      | inr "AwaitingWinnerRandomness" => inr AwaitingWinnerRandomness
+      | inr "Finished" => inr Finished
+      | _ => inl "Failed to decode GameStatus"
+      end.
 End GameStatus.
+Export (hints) GameStatus.
+
 
 (*
 /// Current game round state stored as singleton PDA
@@ -61,11 +82,62 @@ Module GameRound.
     start_timestamp: i64;
     players: list PlayerEntry.t;
     initial_pot: u64;
-    winner: Pubkey;
-    vrf_request_pubkey: Pubkey;
-    vrf_seed: Hash;
+    winner: Pubkey.t;
+    vrf_request_pubkey: Pubkey.t;
+    vrf_seed: Hash.t;
     randomness_fulfielled: bool;
   }.
+
+  #[export]
+  Instance GameRound_JEncode : JEncode GameRound.t :=
+    fun x =>
+    JSON__Object [
+      ("round_id", encode x.(round_id));
+      ("status", encode x.(status));
+      ("start_timestamp", encode x.(start_timestamp));
+      ("players", encode x.(players));
+      ("initial_pot", encode x.(initial_pot));
+      ("winner", encode x.(winner));
+      ("vrf_request_pubkey", encode x.(vrf_request_pubkey));
+      ("vrf_seed", encode x.(vrf_seed));
+      ("randomness_fulfielled", encode x.(randomness_fulfielled))
+    ].
+
+  #[export]
+  Instance GameRound_JDecode : JDecode GameRound.t :=
+    fun j => match j with
+    | JSON__Object [
+        ("round_id", round_id_json);
+        ("status", status_json);
+        ("start_timestamp", start_timestamp_json);
+        ("players", players_json);
+        ("initial_pot", initial_pot_json);
+        ("winner", winner_json);
+        ("vrf_request_pubkey", vrf_request_pubkey_json);
+        ("vrf_seed", vrf_seed_json);
+        ("randomness_fulfielled", randomness_fulfielled_json) ] =>
+      decode round_id_json >>= fun round_id =>
+      decode status_json >>= fun status =>
+      decode start_timestamp_json >>= fun start_timestamp =>
+      decode__list players_json >>= fun players =>
+      decode initial_pot_json >>= fun initial_pot =>
+      decode winner_json >>= fun winner =>
+      decode vrf_request_pubkey_json >>= fun vrf_request_pubkey =>
+      decode vrf_seed_json >>= fun vrf_seed =>
+      decode randomness_fulfielled_json >>= fun randomness_fulfielled =>
+      inr {| round_id := round_id;
+             status := status;
+             start_timestamp := start_timestamp;
+             players := players;
+             initial_pot := initial_pot;
+             winner := winner;
+             vrf_request_pubkey := vrf_request_pubkey;
+             vrf_seed := vrf_seed;
+             randomness_fulfielled := randomness_fulfielled |}
+    | _ => inl "Failed to decode GameRound"
+    end.
+
+
 
   Module Valid.
     Record t (self : GameRound.t) : Prop := {
@@ -112,7 +184,7 @@ Module GameRound.
   *)
   Definition find_player
       (self: GameRound.t)
-      (wallet: Pubkey) :
+      (wallet: Pubkey.t) :
       option PlayerEntry.t :=
     List.find
       (fun (p : PlayerEntry.t) => p.(PlayerEntry.wallet) == wallet)
@@ -126,7 +198,7 @@ Module GameRound.
   *)
   Definition find_player_mut
       (self: GameRound.t)
-      (wallet: Pubkey) :
+      (wallet: Pubkey.t) :
       option ((PlayerEntry.t -> PlayerEntry.t) -> GameRound.t) :=
     match
       zipper_find
@@ -152,4 +224,5 @@ Module GameRound.
     self.(GameRound.initial_pot).
 
 End GameRound.
+Export (hints) GameRound.
 
