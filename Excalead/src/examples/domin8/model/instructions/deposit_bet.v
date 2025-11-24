@@ -83,7 +83,7 @@ Definition deposit_bet
       (* // Add to existing pot *)
       game_round
         <| GameRound.initial_pot :=
-            game_round.(GameRound.initial_pot) +i amount |>
+            game_round.(GameRound.initial_pot) +is amount |>
     end in
 
     (* // Find existing player or add new one *)
@@ -94,7 +94,7 @@ Definition deposit_bet
             (* // Player already exists - add to their bet *)
             PlayerEntry.wallet := existing_player.(PlayerEntry.wallet);
             PlayerEntry.total_bet :=
-              existing_player.(PlayerEntry.total_bet) +i amount;
+              existing_player.(PlayerEntry.total_bet) +is amount;
             PlayerEntry.timestamp := clock.(Clock.unix_timestamp)
           |}
           (* msg!("Updated bet for player: {}, new total: {}", player_key, existing_player.total_bet); *)

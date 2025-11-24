@@ -22,7 +22,7 @@ Definition handler
     (accounts : CreateWithTimestamps.t)
     (deposited_token_mint : Pubkey)
     (stream_data_bump : u8)
-    (sender : Pubkey)
+    (sender : Pubkey.t)
     (salt : u128)
     (deposit_amount : u64)
     (start_time : u64)
