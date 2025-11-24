@@ -55,13 +55,13 @@ End Timestamps.
 Module StreamData.
   Record t : Set := {
     amounts: Amounts.t;
-    deposited_token_mint: Pubkey;
+    deposited_token_mint: Pubkey.t;
     bump: u8;
     salt: u128;
     is_cancelable: bool;
     is_depleted: bool;
     timestamps: Timestamps.t;
-    sender: Pubkey;
+    sender: Pubkey.t;
     was_canceled: bool;
   }.
 
@@ -79,7 +79,7 @@ Module StreamData.
 
   Definition create
       (self : t)
-      (deposited_token_mint: Pubkey)
+      (deposited_token_mint: Pubkey.t)
       (bump: u8)
       (cliff_time: u64)
       (cliff_unlock_amount: u64)
@@ -87,7 +87,7 @@ Module StreamData.
       (end_time: u64)
       (salt: u128)
       (is_cancelable: bool)
-      (sender: Pubkey)
+      (sender: Pubkey.t)
       (start_time: u64)
       (start_unlock_amount: u64) :
       t :=

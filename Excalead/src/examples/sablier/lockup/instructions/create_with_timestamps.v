@@ -20,7 +20,7 @@ End CreateWithTimestamps.
     calculation of the stream data. *)
 Definition handler
     (accounts : CreateWithTimestamps.t)
-    (deposited_token_mint : Pubkey)
+    (deposited_token_mint : Pubkey.t)
     (stream_data_bump : u8)
     (sender : Pubkey.t)
     (salt : u128)

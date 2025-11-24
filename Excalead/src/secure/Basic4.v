@@ -9,7 +9,7 @@ End ErrorCode.
 (** Counter account *)
 Module Counter.
   Record t : Set := {
-    authority : Pubkey;
+    authority : Pubkey.t;
     count : u64;
     bump : u8;
   }.
@@ -26,7 +26,7 @@ Module Account.
 End Account.
 
 Module Signer.
-  Parameter key : forall (self : Signer.t), Pubkey.
+  Parameter key : forall (self : Signer.t), Pubkey.t.
 End Signer.
 
 Module Program.

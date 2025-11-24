@@ -61,7 +61,7 @@ fn generate_rocq(idl: &Idl) -> String {
         for (i, error) in idl.errors.iter().enumerate() {
             let dot = if i == idl.errors.len() - 1 { "." } else { "" };
             if let Some(msg) = &error.msg {
-                        output.push_str(&format!("  (** {} *)\n", msg));
+                output.push_str(&format!("  (** {} *)\n", msg));
             }
             output.push_str(&format!("  | {} : t{}\n", error.name, dot));
         }
@@ -78,30 +78,28 @@ fn generate_rocq(idl: &Idl) -> String {
             }
 
             match &ty_def.ty {
-                IdlTypeDefTy::Struct { fields } => {
-                    match fields {
-                        Some(IdlDefinedFields::Named(fields_list)) => {
-                            output.push_str("  Record t : Set := {\n");
-                            for field in fields_list.iter() {
-                                let rocq_type = idl_type_to_rocq(&field.ty);
-                                output.push_str(&format!("    {} : {};\n", field.name, rocq_type));
-                            }
-                            output.push_str("  }.\n");
+                IdlTypeDefTy::Struct { fields } => match fields {
+                    Some(IdlDefinedFields::Named(fields_list)) => {
+                        output.push_str("  Record t : Set := {\n");
+                        for field in fields_list.iter() {
+                            let rocq_type = idl_type_to_rocq(&field.ty);
+                            output.push_str(&format!("    {} : {};\n", field.name, rocq_type));
                         }
-                        Some(IdlDefinedFields::Tuple(tys)) => {
-                            output.push_str("  Record t : Set := {\n");
-                            for ty in tys.iter() {
-                                let rocq_type = idl_type_to_rocq(ty);
-                                output.push_str(&format!("    _ : {};\n", rocq_type));
-                            }
-                            output.push_str("  }.\n");
-                        }
-                        None => {
-                            output.push_str("  Record t : Set := {\n");
-                            output.push_str("  }.\n");
-                        }
+                        output.push_str("  }.\n");
                     }
-                }
+                    Some(IdlDefinedFields::Tuple(tys)) => {
+                        output.push_str("  Record t : Set := {\n");
+                        for ty in tys.iter() {
+                            let rocq_type = idl_type_to_rocq(ty);
+                            output.push_str(&format!("    _ : {};\n", rocq_type));
+                        }
+                        output.push_str("  }.\n");
+                    }
+                    None => {
+                        output.push_str("  Record t : Set := {\n");
+                        output.push_str("  }.\n");
+                    }
+                },
                 IdlTypeDefTy::Enum { variants } => {
                     output.push_str("  Inductive t : Set :=\n");
                     for (i, variant) in variants.iter().enumerate() {
@@ -138,7 +136,7 @@ fn generate_rocq(idl: &Idl) -> String {
             for module_name in ty_def.name.split("::").collect::<Vec<_>>().iter().rev() {
                 output.push_str(&format!("End {}.\n", module_name));
             }
-            output.push_str("\n");
+            output.push('\n');
         }
     }
 
@@ -160,7 +158,11 @@ fn generate_rocq(idl: &Idl) -> String {
         output.push_str("Module Instruction.\n");
         output.push_str("  Inductive t : Set -> Set :=\n");
         for (i, instruction) in idl.instructions.iter().enumerate() {
-            let dot = if i == idl.instructions.len() - 1 { "." } else { "" };
+            let dot = if i == idl.instructions.len() - 1 {
+                "."
+            } else {
+                ""
+            };
             output.push_str(&format!("  | {}\n", instruction.name));
             output.push_str("    (* Accounts *)\n");
             for account in &instruction.accounts {
@@ -168,11 +170,23 @@ fn generate_rocq(idl: &Idl) -> String {
                     IdlInstructionAccountItem::Single(account) => {
                         output.push_str(&format!("      ({} : Account.t", account.name));
                         output.push_str("\n       ");
-                        output.push_str(if account.writable { " IsWritable.Yes" } else { " IsWritable.No" });
+                        output.push_str(if account.writable {
+                            " IsWritable.Yes"
+                        } else {
+                            " IsWritable.No"
+                        });
                         output.push_str("\n       ");
-                        output.push_str(if account.signer { " IsSigner.Yes" } else { " IsSigner.No" });
+                        output.push_str(if account.signer {
+                            " IsSigner.Yes"
+                        } else {
+                            " IsSigner.No"
+                        });
                         output.push_str("\n       ");
-                        output.push_str(if account.optional { " IsOptional.Yes" } else { " IsOptional.No" });
+                        output.push_str(if account.optional {
+                            " IsOptional.Yes"
+                        } else {
+                            " IsOptional.No"
+                        });
                         output.push_str("\n       ");
                         match &account.address {
                             Some(address) => {
@@ -185,7 +199,7 @@ fn generate_rocq(idl: &Idl) -> String {
                         output.push_str("\n       ");
                         match &account.pda {
                             Some(_pda) => {
-                                output.push_str(&format!(" (Some tt)"));
+                                output.push_str(" (Some tt)");
                                 output.push_str("\n         (* TODO: pda *)");
                             }
                             None => {
@@ -237,9 +251,9 @@ fn idl_type_to_rocq(ty: &IdlType) -> String {
         IdlType::I128 => "i128".to_string(),
         IdlType::F32 => "f32".to_string(),
         IdlType::F64 => "f64".to_string(),
-        IdlType::Bytes => "bytes".to_string(),
+        IdlType::Bytes => "bytes.t".to_string(),
         IdlType::String => "string".to_string(),
-        IdlType::Pubkey => "Pubkey".to_string(),
+        IdlType::Pubkey => "Pubkey.t".to_string(),
         IdlType::Option(inner) => format!("option ({})", idl_type_to_rocq(inner)),
         IdlType::Vec(inner) => format!("list ({})", idl_type_to_rocq(inner)),
         IdlType::Array(inner, len) => match len {

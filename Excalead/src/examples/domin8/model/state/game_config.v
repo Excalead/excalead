@@ -30,7 +30,6 @@ Module GameDurationConfig.
     | _ =>
       inl "Failed to decode GameDurationConfig"
     end.
-
 End GameDurationConfig.
 Export (hints) GameDurationConfig.
 

@@ -3,7 +3,7 @@ From Excalead Require Import Excalead Anchor_lang.
 
 (** Constants *)
 (* [116, 101, 115, 116] *)
-Parameter BYTES_STR : bytes.
+Parameter BYTES_STR : bytes.t.
 
 (* 116 *)
 Parameter BYTE_STR : u8.
@@ -113,9 +113,9 @@ Module State.
     f64_field : f64;
     u128_field : u128;
     i128_field : i128;
-    bytes_field : bytes;
+    bytes_field : bytes.t;
     string_field : string;
-    pubkey_field : Pubkey;
+    pubkey_field : Pubkey.t;
     vec_field : list (u64);
     vec_struct_field : list (FooStruct.t);
     option_field : option (bool);
@@ -287,9 +287,9 @@ Module Instruction.
       (f64_field : f64)
       (u128_field : u128)
       (i128_field : i128)
-      (bytes_field : bytes)
+      (bytes_field : bytes.t)
       (string_field : string)
-      (pubkey_field : Pubkey)
+      (pubkey_field : Pubkey.t)
       (vec_field : list (u64))
       (vec_struct_field : list (FooStruct.t))
       (option_field : option (bool))
