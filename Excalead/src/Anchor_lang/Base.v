@@ -2,7 +2,7 @@ From Excalead Require Import Excalead.
 
 Module Hash.
   Record t : Set := {
-    value : u32;
+    value : string;
   }.
 
   #[export]

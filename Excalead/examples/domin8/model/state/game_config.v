@@ -112,7 +112,6 @@ Module GameConfig.
     end
         .
 
-
   (*
   /// Account space calculation:
   /// 8 (discriminator) + 32 (authority) + 32 (treasury) + 2 (house_fee) + 8 (min_bet)

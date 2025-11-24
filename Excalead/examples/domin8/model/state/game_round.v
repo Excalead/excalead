@@ -38,7 +38,7 @@ Module GameStatus.
 
   #[export]
   Instance GameStatus_JDecode : JDecode GameStatus.t :=
-    fun j => match (decode j) with
+    fun j => match decode j with
       | inr "Idle" => inr Idle
       | inr "Waiting" => inr Waiting
       | inr "AwaitingWinnerRandomness" => inr AwaitingWinnerRandomness
