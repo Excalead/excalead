@@ -1,5 +1,5 @@
 # Excalead
-> Continuous formal verification auditing for Solana smart contracts
+> Continuous auditing for Solana smart contracts, with Formal Verification & AI
 
 <div align="center">
   <p>
@@ -98,7 +98,7 @@ Excalead is designed to augment, but not replace, the security auditing done by 
 - Status: Private Beta; contact us to test it out!
 - X: [@Excalead](https://x.com/Excalead)
 
-Built for the Solana [Cypherpunk Colosseum](https://www.colosseum.com/cypherpunk) Hackathon.
+Built for the Solana [Cypherpunk Colosseum](https://www.colosseum.com/cypherpunk) Hackathon, with the help of [SuperTeam France 🇫🇷🥖](https://fr.superteam.fun/).
 
 <div align="center">
   <img src="./static/logo.png" alt="Excalead" width="180px" />
