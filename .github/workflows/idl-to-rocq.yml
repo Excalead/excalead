@@ -38,6 +38,10 @@ jobs:
           cargo run --manifest-path src/Cargo.toml --bin idl-to-rocq -- \
             Excalead/src/secure/new.json \
             -o Excalead/src/secure/new_idl.v
+          cargo run --manifest-path src/Cargo.toml --bin idl-to-rocq -- \
+            Excalead/src/secure/sablier_lockup.json \
+            -o Excalead/src/secure/sablier_lockup_idl.v \
+            --custom-type-order Timestamps
 
       - name: Make a Git diff
         run: |
