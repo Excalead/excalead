@@ -1,6 +1,6 @@
 From Excalead Require Import Excalead Tactics Vector Anchor_lang.
 
-From domin8 Require Import state.mod errors constants.
+From Excalead.examples.domin8 Require Import state.mod errors constants.
 
 (*
 #[derive(Accounts)]
@@ -49,11 +49,11 @@ Definition deposit_bet
     "Invalid game status" in
 
   require!
-    amount >=? MIN_BET_LAMPORTS with
+    amount >=i MIN_BET_LAMPORTS with
     "Bet too small" in
 
   require!
-    Z.of_nat (List.length game_round.(GameRound.players)) <? MAX_PLAYERS with
+    Z.of_nat (List.length game_round.(GameRound.players)) <i MAX_PLAYERS with
     "Max Players Reached" in
 
   let? _ :=
@@ -83,7 +83,7 @@ Definition deposit_bet
       (* // Add to existing pot *)
       game_round
         <| GameRound.initial_pot :=
-            game_round.(GameRound.initial_pot) + amount |>
+            game_round.(GameRound.initial_pot) +is amount |>
     end in
 
     (* // Find existing player or add new one *)
@@ -94,7 +94,7 @@ Definition deposit_bet
             (* // Player already exists - add to their bet *)
             PlayerEntry.wallet := existing_player.(PlayerEntry.wallet);
             PlayerEntry.total_bet :=
-              existing_player.(PlayerEntry.total_bet) + amount;
+              existing_player.(PlayerEntry.total_bet) +is amount;
             PlayerEntry.timestamp := clock.(Clock.unix_timestamp)
           |}
           (* msg!("Updated bet for player: {}, new total: {}", player_key, existing_player.total_bet); *)
@@ -131,11 +131,13 @@ Proof.
   | |- context [ GameRound.find_player_mut ?game_round _ ] =>
     remember game_round as game_round' eqn:HeqGameRound;
     assert (Hgame_round'_length:
-        Z.of_nat (Datatypes.length game_round'.(GameRound.players)) < MAX_PLAYERS)
-      by (subst; step; simpl; lia);
-    clear HeqGameRound
-  end.
-
+        Z.of_nat (Datatypes.length game_round'.(GameRound.players)) < i[MAX_PLAYERS]
+    )
+  end. {
+    subst.
+    step; unfold "<i" in *; cbn in *; lia.
+  }
+  clear HeqGameRound.
   unfold GameRound.find_player_mut.
   match goal with
   | |- context [Vector.zipper_find ?pred' ?vec' ] =>
@@ -145,14 +147,15 @@ Proof.
   { (* If GameRound.find_player_mut didn't find the player *)
     rewrite Hresult.
     constructor.
-    simpl; lia.
+    unfold "<i" in *.
+    cbn in *.
+    lia.
   }
   { (* If GameRound.find_player_mut did find the player *)
     rewrite Hresult.
     constructor.
-    simpl.
+    unfold "<i" in *; cbn in *.
     rewrite unzipper_length with (x := x), <- Hunzip.
     lia.
   }
 Qed.
-

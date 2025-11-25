@@ -16,3 +16,11 @@ Notation "'let?' x ':=' e 'in' k" :=
   (Result.bind e (fun x => k))
   (at level 200, x pattern, e at level 200, k at level 200).
 
+Module ToErrorString.
+  Class C (A : Set) := {
+    to_error_string : A -> string;
+  }.
+End ToErrorString.
+
+Definition error {A Error : Set} `{ToErrorString.C Error} (error : Error) : t A :=
+  Err (ToErrorString.to_error_string error).

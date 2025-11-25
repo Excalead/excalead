@@ -28,7 +28,3 @@
      coq-hammer
      coq-smpl)
   (allow_empty))
-
-
-
-
