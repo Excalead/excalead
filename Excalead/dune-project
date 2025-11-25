@@ -26,5 +26,6 @@
     (coq         (>= 8.20.0 ))
     (coq-coqutil (>= 0.0.5))
      coq-hammer
+     coq-json
      coq-smpl)
   (allow_empty))
