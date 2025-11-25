@@ -158,58 +158,58 @@ Module Instruction.
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (* TODO: composite accounts *)
       (zc_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (token_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (mint_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (token_interface_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (mint_interface_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (payer : Account.t
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (system_program : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        (Some 11111111111111111111111111111111)
-        None
+        (Address.Constant "11111111111111111111111111111111")
+        Pda.No
       )
     (* Arguments *)
     (* Return *)
@@ -220,58 +220,58 @@ Module Instruction.
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (* TODO: composite accounts *)
       (zc_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (token_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (mint_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (token_interface_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (mint_interface_account : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (payer : Account.t
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (system_program : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        (Some 11111111111111111111111111111111)
-        None
+        (Address.Constant "11111111111111111111111111111111")
+        Pda.No
       )
     (* Arguments *)
       (bool_field : bool)
@@ -308,22 +308,22 @@ Module Instruction.
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (payer : Account.t
         IsWritable.Yes
         IsSigner.Yes
         IsOptional.No
-        None
-        None
+        Address.Any
+        Pda.No
       )
       (system_program : Account.t
         IsWritable.No
         IsSigner.No
         IsOptional.No
-        (Some 11111111111111111111111111111111)
-        None
+        (Address.Constant "11111111111111111111111111111111")
+        Pda.No
       )
     (* Arguments *)
       (vec_of_option : list (option (u64)))

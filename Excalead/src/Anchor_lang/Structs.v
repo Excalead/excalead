@@ -17,8 +17,25 @@ Module IsOptional.
   Inductive t : Set := Yes | No.
 End IsOptional.
 
+Module Address.
+  Inductive t : Set := Constant (s : string) | Any.
+End Address.
+
+Module PdaSeed.
+  Inductive t : Set :=
+  | Const (value : list Z)
+  | Arg (path : string)
+  | Account (path : string) (account : option string).
+End PdaSeed.
+
+Module Pda.
+  Inductive t : Set :=
+  | No
+  | Yes (seeds : list PdaSeed.t) (program : option PdaSeed.t).
+End Pda.
+
 Module Account.
-  Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> option Z -> option unit -> Set.
+  Parameter t : IsWritable.t -> IsSigner.t -> IsOptional.t -> Address.t -> Pda.t -> Set.
 End Account.
 Export Account.
 

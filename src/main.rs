@@ -1,6 +1,9 @@
 use anchor_lang_idl::{
     convert::convert_idl,
-    types::{Idl, IdlArrayLen, IdlDefinedFields, IdlInstructionAccountItem, IdlType, IdlTypeDefTy},
+    types::{
+        Idl, IdlArrayLen, IdlDefinedFields, IdlInstructionAccountItem, IdlPda, IdlSeed, IdlType,
+        IdlTypeDefTy,
+    },
 };
 use clap::Parser;
 use std::fs;
@@ -14,6 +17,9 @@ struct Args {
     /// Optional output file (defaults to stdout)
     #[arg(short, long)]
     output: Option<String>,
+    /// List of custom type names to order before others, comma-separated
+    #[arg(long)]
+    custom_type_order: Option<String>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -23,8 +29,20 @@ fn main() -> anyhow::Result<()> {
     let idl_content = fs::read(&args.idl_path)?;
     let idl = convert_idl(&idl_content)?;
 
+    // Parse custom type order if provided
+    let custom_type_order: Vec<String> = args
+        .custom_type_order
+        .as_ref()
+        .map(|s| {
+            s.split(',')
+                .map(|name| name.trim().to_string())
+                .filter(|name| !name.is_empty())
+                .collect()
+        })
+        .unwrap_or_default();
+
     // Generate Rocq code
-    let rocq_code = generate_rocq(&idl);
+    let rocq_code = generate_rocq(&idl, &custom_type_order);
 
     // Output the result
     if let Some(output_path) = &args.output {
@@ -36,7 +54,28 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn generate_rocq(idl: &Idl) -> String {
+fn name_to_rocq(name: &str) -> String {
+    let keywords = [
+        "Type",
+        "Set",
+        "Inductive",
+        "Record",
+        "End",
+        "Module",
+        "Parameter",
+        "match",
+        "end",
+        "with",
+    ];
+
+    if keywords.contains(&name) {
+        return format!("{}_", name);
+    }
+
+    name.to_string()
+}
+
+fn generate_rocq(idl: &Idl, custom_type_order: &[String]) -> String {
     let mut output = String::new();
 
     // Header
@@ -71,7 +110,24 @@ fn generate_rocq(idl: &Idl) -> String {
     // Custom types
     if !idl.types.is_empty() {
         output.push_str("(** Custom types *)\n");
-        for ty_def in &idl.types {
+
+        // Sort types according to custom_type_order
+        let mut sorted_types = idl.types.clone();
+        if !custom_type_order.is_empty() {
+            sorted_types.sort_by(|a, b| {
+                let a_index = custom_type_order.iter().position(|name| name == &a.name);
+                let b_index = custom_type_order.iter().position(|name| name == &b.name);
+
+                match (a_index, b_index) {
+                    (Some(a_idx), Some(b_idx)) => a_idx.cmp(&b_idx),
+                    (Some(_), None) => std::cmp::Ordering::Less,
+                    (None, Some(_)) => std::cmp::Ordering::Greater,
+                    (None, None) => std::cmp::Ordering::Equal,
+                }
+            });
+        }
+
+        for ty_def in &sorted_types {
             // Split the name at each `::` and make as many sub-modules
             for module_name in ty_def.name.split("::") {
                 output.push_str(&format!("Module {}.\n", module_name));
@@ -83,7 +139,11 @@ fn generate_rocq(idl: &Idl) -> String {
                         output.push_str("  Record t : Set := {\n");
                         for field in fields_list.iter() {
                             let rocq_type = idl_type_to_rocq(&field.ty);
-                            output.push_str(&format!("    {} : {};\n", field.name, rocq_type));
+                            output.push_str(&format!(
+                                "    {} : {};\n",
+                                name_to_rocq(&field.name),
+                                rocq_type
+                            ));
                         }
                         output.push_str("  }.\n");
                     }
@@ -190,20 +250,19 @@ fn generate_rocq(idl: &Idl) -> String {
                         output.push_str("\n       ");
                         match &account.address {
                             Some(address) => {
-                                output.push_str(&format!(" (Some {})", address));
+                                output.push_str(&format!(" (Address.Constant \"{}\")", address));
                             }
                             None => {
-                                output.push_str(" None");
+                                output.push_str(" Address.Any");
                             }
                         }
                         output.push_str("\n       ");
                         match &account.pda {
-                            Some(_pda) => {
-                                output.push_str(" (Some tt)");
-                                output.push_str("\n         (* TODO: pda *)");
+                            Some(pda) => {
+                                output.push_str(&format!(" {}", pda_to_rocq(pda)));
                             }
                             None => {
-                                output.push_str(" None");
+                                output.push_str(" Pda.No");
                             }
                         }
                         output.push_str("\n      )\n");
@@ -275,5 +334,62 @@ fn idl_type_to_rocq(ty: &IdlType) -> String {
         IdlType::U256 => "u128 (* TODO: u256 *)".to_string(),
         IdlType::I256 => "i128 (* TODO: i256 *)".to_string(),
         _ => format!("TODO (* {:?})", ty),
+    }
+}
+
+fn pda_to_rocq(pda: &IdlPda) -> String {
+    let seeds = pda.seeds.iter().map(seed_to_rocq).collect::<Vec<_>>();
+    let program = optional_to_rocq(pda.program.as_ref().map(seed_to_rocq), true, true);
+    format!(
+        "(Pda.Yes [\n            {}\n          ]\n          {}\n        )",
+        seeds.join(";\n            "),
+        program
+    )
+}
+
+fn seed_to_rocq(seed: &IdlSeed) -> String {
+    match seed {
+        IdlSeed::Const(seed) => {
+            let value = seed
+                .value
+                .iter()
+                .map(|b| b.to_string())
+                .collect::<Vec<_>>()
+                .join("; ");
+            format!("PdaSeed.Const [{}]", value)
+        }
+        IdlSeed::Arg(seed) => {
+            format!("PdaSeed.Arg \"{}\"", seed.path)
+        }
+        IdlSeed::Account(seed) => {
+            format!(
+                "PdaSeed.Account \"{}\" {}",
+                seed.path,
+                optional_to_rocq(seed.account.clone(), true, false)
+            )
+        }
+    }
+}
+
+fn optional_to_rocq(
+    optional: Option<String>,
+    with_parentheses_inside: bool,
+    with_parentheses_outside: bool,
+) -> String {
+    match optional {
+        Some(optional) => {
+            if with_parentheses_inside {
+                if with_parentheses_outside {
+                    format!("(Some ({}))", optional)
+                } else {
+                    format!("Some ({})", optional)
+                }
+            } else if with_parentheses_outside {
+                format!("(Some {})", optional)
+            } else {
+                format!("Some {}", optional)
+            }
+        }
+        None => "None".to_string(),
     }
 }
