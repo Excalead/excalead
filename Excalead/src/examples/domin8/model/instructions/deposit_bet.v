@@ -1,8 +1,6 @@
-From Excalead Require Import Excalead Tactics Vector Anchor_lang.
+From Excalead Require Import Excalead ExcaExtraction Tactics Vector Anchor_lang.
 
 From Excalead.examples.domin8 Require Import state.mod errors constants.
-
-Require Extraction.
 
 (*
 #[derive(Accounts)]
