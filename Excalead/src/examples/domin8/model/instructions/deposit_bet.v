@@ -209,4 +209,5 @@ Definition test_deposit_bet (ctx_input amount_input : json) : Result.t json :=
   | inl s => Result.Err s
   end.
 
+
 Recursive Extraction test_deposit_bet.
