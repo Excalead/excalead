@@ -1,4 +1,4 @@
-From Excalead Require Import Excalead ExcaExtraction Tactics Vector Anchor_lang.
+From Excalead Require Import Excalead Tactics Vector Anchor_lang.
 
 From Excalead.examples.domin8 Require Import state.mod errors constants.
 
@@ -208,6 +208,3 @@ Definition test_deposit_bet (ctx_input amount_input : json) : Result.t json :=
   | inr res => res
   | inl s => Result.Err s
   end.
-
-
-Recursive Extraction test_deposit_bet.
