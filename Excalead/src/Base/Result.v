@@ -22,5 +22,9 @@ Module ToErrorString.
   }.
 End ToErrorString.
 
+Instance stringIsToErrorString : ToErrorString.C string := {
+  to_error_string := id;
+}.
+
 Definition error {A Error : Set} `{ToErrorString.C Error} (error : Error) : t A :=
   Err (ToErrorString.to_error_string error).
