@@ -5,5 +5,3 @@ Class Key (X : Type) :=
 
 Class ToAccountInfo (X : Type) :=
   to_account_info : forall (self : X), AccountInfo.t.
-
-

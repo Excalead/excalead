@@ -22,11 +22,14 @@ Module Hash.
   Instance Hash_EqDec : EqDec Hash.t :=
     fun a b => a.(value) == b.(value).
 
+  Parameter zero : Hash.t.
 End Hash.
 Export (hints) Hash.
 
 Module AccountInfo.
   Parameter t : Set.
+
+  Parameter len : forall (self : AccountInfo.t), usize.
 End AccountInfo.
 Export (hints) AccountInfo.
 
