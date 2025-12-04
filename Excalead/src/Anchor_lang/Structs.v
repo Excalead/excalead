@@ -68,6 +68,14 @@ Module System.
 End System.
 Export System.
 
+Module SystemAccount.
+  Parameter t : Set.
+
+  Parameter ToAccountInfo_SystemAccount : ToAccountInfo SystemAccount.t.
+  #[export] Existing Instance ToAccountInfo_SystemAccount.
+End SystemAccount.
+Export SystemAccount.
+
 Module Context.
   Record t {Accounts : Set} : Set := {
     (* program : AccountInfo; *)

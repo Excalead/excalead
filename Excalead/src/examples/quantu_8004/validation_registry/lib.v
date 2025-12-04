@@ -7,7 +7,7 @@ Module Initialize.
   Record t : Set := {
     config : ValidationConfig.t;
     authority : Signer.t;
-    system_program : unit;
+    system_program : System.t;
   }.
 End Initialize.
 
@@ -21,7 +21,7 @@ Module RequestValidation.
     token_account : TokenAccount.t;
     validation_request : ValidationRequest.t;
     identity_registry_program : UncheckedAccount.t;
-    system_program : unit;
+    system_program : System.t;
   }.
 
   Parameters stored_agent_id_of_agent_account :
@@ -45,7 +45,7 @@ Module CloseValidation.
     token_account : TokenAccount.t;
     validation_request : ValidationRequest.t;
     identity_registry_program : UncheckedAccount.t;
-    system_program : unit;
+    rent_receiver : SystemAccount.t;
   }.
 End CloseValidation.
 
