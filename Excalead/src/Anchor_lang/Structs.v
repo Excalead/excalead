@@ -76,12 +76,27 @@ Module SystemAccount.
 End SystemAccount.
 Export SystemAccount.
 
+Module Bumps.
+  Record t : Set := {
+    counter : u8;
+    (* config : ; *)
+  }.
+End Bumps.
+
 Module Context.
   Record t {Accounts : Set} : Set := {
     (* program : AccountInfo; *)
     accounts : Accounts;
+    bumps : Bumps.t;
   }.
   Arguments t : clear implicits.
+
+  Definition mutate_accounts {Accounts : Set}
+      (self : Context.t Accounts)
+      (f : Accounts -> Accounts)
+      : Context.t Accounts :=
+    self <| Context.accounts := f self.(Context.accounts) |>.
+
 
   Parameter new : forall {Accounts : Set},
     AccountInfo.t -> Accounts -> Context.t Accounts.
