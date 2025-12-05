@@ -1,5 +1,5 @@
 From Excalead Require Import Excalead Anchor_lang Anchor_spl.
-From Excalead.examples.quantu_8004 Require Import error events state.
+From Excalead.examples.quantu_8004.validation_registry Require Import error events state.
 
 Parameter IDENTITY_REGISTRY_ID : Pubkey.t.
 
