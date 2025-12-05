@@ -79,7 +79,7 @@ Export SystemAccount.
 Module Bumps.
   Record t : Set := {
     counter : u8;
-    (* config : ; *)
+    config : BTreeMaps.t string u8;
   }.
 End Bumps.
 
@@ -87,7 +87,7 @@ Module Context.
   Record t {Accounts : Set} : Set := {
     (* program : AccountInfo; *)
     accounts : Accounts;
-    bumps : Bumps.t;
+    bumps : BTreeMaps.t string u8;
   }.
   Arguments t : clear implicits.
 

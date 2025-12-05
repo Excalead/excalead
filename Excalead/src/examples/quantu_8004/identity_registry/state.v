@@ -8,7 +8,7 @@ Module RegistryConfig.
     next_agent_id: u64;
     total_agents: u64;
     collection_mint: Pubkey.t;
-    collection_authority: u8;
+    collection_authority_bump: u8;
     bump: u8;
   }.
 

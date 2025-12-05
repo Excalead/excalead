@@ -170,19 +170,17 @@ Module identity_registry.
     (ctx: Context.t Initialize.t)
     : Result.t (Context.t Initialize.t)  :=
 
-    let config := ctx.(Context.accounts).(Initialize.config) in
-    let config := config
-      <| RegistryConfig.authority :=
-          key ctx.(Context.accounts).(Initialize.authority) |>
-      <| RegistryConfig.next_agent_id := 0 |>
-      <| RegistryConfig.total_agents  := 0 |>
+    let ctx := Context.mutate_accounts ctx (fun accounts =>
+      let config := accounts.(Initialize.config)
+          <| RegistryConfig.authority :=
+              key ctx.(Context.accounts).(Initialize.authority) |>
+          <| RegistryConfig.next_agent_id := 0 |>
+          <| RegistryConfig.total_agents  := 0 |>
       (* <| RegistryConfig.collection_mint := *)
       (*     key ctx.(Context.accounts).(Initialize.collection_mint) |> *)
       (* <| RegistryConfig.bump := *)
-      (*     ctx.(Context.bumps).(Initialize.collection_mint) |> *)
-    in
-    let ctx := ctx <| Context.accounts :=
-            ctx.(Context.accounts) <| Initialize.config := config |> |> in
+      (*     ctx.(Context.bumps).(Bumps.config) |> *)
+      in accounts <| Initialize.config := config |>) in
 
     (* token::mint_to( *)
     (*     CpiContext::new( *)
@@ -245,16 +243,16 @@ Module identity_registry.
       (agent_uri: string)
       (metadata: list MetadataEntry.t)
       : Result.t (Context.t Register.t) :=
-    (* require!( *)
-    (*     agent_uri.len() <= AgentAccount::MAX_URI_LENGTH, *)
-    (*     IdentityError::UriTooLong *)
-    (* ); *)
+    require!
+        Z.of_nat (String.length agent_uri) <=i AgentAccount.MAX_URI_LENGTH with
+        IdentityError.UriTooLong
+    in
 
     (* // Validate metadata *)
-    (* require!( *)
-    (*     metadata.len() <= AgentAccount::MAX_METADATA_ENTRIES, *)
-    (*     IdentityError::MetadataLimitReached *)
-    (* ); *)
+    require!
+        Z.of_nat (List.length metadata) <=i AgentAccount.MAX_METADATA_ENTRIES with
+        IdentityError.MetadataLimitReached
+    in
 
     (* for entry in &metadata { *)
     (*     require!( *)
@@ -268,22 +266,26 @@ Module identity_registry.
     (* } *)
 
     (* // Extract bump before taking mutable reference (borrow checker) *)
-    (* let collection_authority_bump = ctx.accounts.config.collection_authority_bump; *)
-    (* let collection_mint = ctx.accounts.config.collection_mint; *)
+    let collection_authority_bump :=
+      ctx.(Context.accounts).(Initialize.config).(RegistryConfig.collection_authority_bump) in
+    (* let collection_mint := *)
+    (*   ctx.(Context.accounts).(Initialize.config).(RegistryConfig.collection_mint) in *)
 
-    (* let config = &mut ctx.accounts.config; *)
-    (* let agent_id = config.next_agent_id; *)
+    let ctx := Context.mutate_accounts ctx (fun accounts =>
+      let config := accounts.(Initialize.config) in
+      (* let agent_id = config.next_agent_id; *)
 
-    (* // Increment counters with overflow protection *)
-    (* config.next_agent_id = config *)
-    (*     .next_agent_id *)
-    (*     .checked_add(1) *)
-    (*     .ok_or(IdentityError::Overflow)?; *)
+      (* // Increment counters with overflow protection *)
+      (* config.next_agent_id = config *)
+      (*     .next_agent_id *)
+      (*     .checked_add(1) *)
+      (*     .ok_or(IdentityError::Overflow)?; *)
 
-    (* config.total_agents = config *)
-    (*     .total_agents *)
-    (*     .checked_add(1) *)
-    (*     .ok_or(IdentityError::Overflow)?; *)
+      (* config.total_agents = config *)
+      (*     .total_agents *)
+      (*     .checked_add(1) *)
+      (*     .ok_or(IdentityError::Overflow)?; *)
+      accounts <| Initialize.config := config |>) in
 
     (* // Mint 1 agent NFT to owner *)
     (* token::mint_to( *)
